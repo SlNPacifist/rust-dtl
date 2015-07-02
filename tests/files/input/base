@@ -9,4 +9,3 @@ more of base template
 {% block content %}base content{% endblock %}
 
 end of base template
-

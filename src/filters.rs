@@ -36,6 +36,9 @@ impl FilterExpression {
     pub fn var(&self) -> &str { &self.var }
 
     pub fn render(&self, context: &Context) -> String {
-        format!("{}", context.get(&self.var).unwrap())
+        match context.get(&self.var) {
+            Some(val) => format!("{}", val),
+            None => String::new(),
+        }
     }
 }

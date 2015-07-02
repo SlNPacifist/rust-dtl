@@ -91,7 +91,8 @@ fn parse(iter: &mut Iter<Token>, endblock: Option<String>) -> Result<Vec<Rc<Box<
                         return Ok(root);
                     }
                     match build_expr(cmd, body, iter) {
-                        Ok(tmp) => root.push(Rc::new(tmp)),
+                        Ok(Some(tmp)) => root.push(Rc::new(tmp)),
+                        Ok(None) => {},
                         Err(e) => return Err(e),
                     };
                 } else {
@@ -105,19 +106,25 @@ fn parse(iter: &mut Iter<Token>, endblock: Option<String>) -> Result<Vec<Rc<Box<
 }
 
 use std::convert::AsRef;
-fn build_expr(name: String, body: String, iter: &mut Iter<Token>) -> Result<Box<Node>> {
+fn build_expr(name: String, body: String, iter: &mut Iter<Token>) -> Result<Option<Box<Node>>> {
     match name.as_ref() {
         "block" => {
             match parse(iter, Some("endblock".to_string())) {
                 Ok(nodes) => {
-                    Ok(Box::new(BlockNode::new(body, nodes)))
+                    Ok(Some(Box::new(BlockNode::new(body, nodes))))
                 },
                 Err(e) => Err(e),
             }
         },
         "extends" => {
-            Ok(Box::new(ExtendsNode::new(body)))
+            Ok(Some(Box::new(ExtendsNode::new(body))))
         },
+        "comment" => {
+            match parse(iter, Some("endcomment".to_string())) {
+                Ok(_) => Ok(None),
+                Err(e) => Err(e),
+            }
+        }
         _ => Err(Error::new(ErrorKind::Other, format!("Not found tag : {}", name))),
     }
 }
