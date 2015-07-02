@@ -83,3 +83,20 @@ fn include() {
     }
     assert_eq!(tpl.render(&mut ctx), except);
 }
+
+#[test]
+fn include_template() {
+    let mut except = String::new();
+    let file = File::open("tests/files/except/include_template");
+    assert!(file.is_ok());
+    assert!(file.unwrap().read_to_string(&mut except).is_ok());
+    let mut ctx = Context::new();
+    ctx.set("base_var", Box::new("base-barstring".to_string()));
+    ctx.set("test_var", Box::new("test-barstring".to_string()));
+    let mut tpl = Template::new(Path::new("include_template"), Path::new("tests/files/input/"));
+    match tpl.compile() {
+        Err(e) => panic!(format!("{}", e)),
+        _ => {}
+    }
+    assert_eq!(tpl.render(&mut ctx), except);
+}
