@@ -39,13 +39,45 @@ fn extends() {
 }
 
 #[test]
-fn extends_4() {
+fn extends4() {
     let mut except = String::new();
     let file = File::open("tests/files/except/extends4");
     assert!(file.is_ok());
     assert!(file.unwrap().read_to_string(&mut except).is_ok());
     let mut ctx = Context::new();
     let mut tpl = Template::new(Path::new("extends4"), Path::new("tests/files/input/"));
+    match tpl.compile() {
+        Err(e) => panic!(format!("{}", e)),
+        _ => {}
+    }
+    assert_eq!(tpl.render(&mut ctx), except);
+}
+
+#[test]
+fn extends_path() {
+    let mut except = String::new();
+    let file = File::open("tests/files/except/extends_path");
+    assert!(file.is_ok());
+    assert!(file.unwrap().read_to_string(&mut except).is_ok());
+    let mut ctx = Context::new();
+    ctx.set("base_var", Box::new("base-barstring".to_string()));
+    ctx.set("test_var", Box::new("test-barstring".to_string()));
+    let mut tpl = Template::new(Path::new("extends_path"), Path::new("tests/files/input/"));
+    match tpl.compile() {
+        Err(e) => panic!(format!("{}", e)),
+        _ => {}
+    }
+    assert_eq!(tpl.render(&mut ctx), except);
+}
+
+#[test]
+fn extends_path2() {
+    let mut except = String::new();
+    let file = File::open("tests/files/except/extends_path2");
+    assert!(file.is_ok());
+    assert!(file.unwrap().read_to_string(&mut except).is_ok());
+    let mut ctx = Context::new();
+    let mut tpl = Template::new(Path::new("extends_path2"), Path::new("tests/files/input/"));
     match tpl.compile() {
         Err(e) => panic!(format!("{}", e)),
         _ => {}
@@ -94,6 +126,21 @@ fn include_template() {
     ctx.set("base_var", Box::new("base-barstring".to_string()));
     ctx.set("test_var", Box::new("test-barstring".to_string()));
     let mut tpl = Template::new(Path::new("include_template"), Path::new("tests/files/input/"));
+    match tpl.compile() {
+        Err(e) => panic!(format!("{}", e)),
+        _ => {}
+    }
+    assert_eq!(tpl.render(&mut ctx), except);
+}
+
+#[test]
+fn path1() {
+    let mut except = String::new();
+    let file = File::open("tests/files/except/path1");
+    assert!(file.is_ok());
+    assert!(file.unwrap().read_to_string(&mut except).is_ok());
+    let mut ctx = Context::new();
+    let mut tpl = Template::new(Path::new("path1/base1"), Path::new("tests/files/input/"));
     match tpl.compile() {
         Err(e) => panic!(format!("{}", e)),
         _ => {}
