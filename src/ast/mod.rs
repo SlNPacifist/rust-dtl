@@ -24,13 +24,14 @@ use std::vec::Vec;
 use std::boxed::Box;
 use std::io::Result;
 use std::io::{Error, ErrorKind};
-use std::slice::Iter;
 use std::rc::Rc;
+use std::slice::Iter;
 use mopa::Any;
 
 use scanner::Token;
 use scanner::TokenId;
 use super::Context;
+use tags;
 
 mod block_node;
 mod extends_node;
@@ -62,7 +63,7 @@ pub fn build(tokens: Vec<Token>) -> Result<Vec<Rc<Box<Node>>>> {
     parse(&mut tokens.iter(), None)
 }
 
-fn parse(iter: &mut Iter<Token>, endblock: Option<String>) -> Result<Vec<Rc<Box<Node>>>> {
+pub fn parse(iter: &mut Iter<Token>, endblock: Option<String>) -> Result<Vec<Rc<Box<Node>>>> {
     let mut root: Vec<Rc<Box<Node>>> = Vec::new();
     let mut cur = iter.next();
     while cur.is_some() {
@@ -90,7 +91,7 @@ fn parse(iter: &mut Iter<Token>, endblock: Option<String>) -> Result<Vec<Rc<Box<
                     if endblock == Some(cmd.clone()) {
                         return Ok(root);
                     }
-                    match build_expr(cmd, body, iter) {
+                    match tags::build(cmd, body, iter) {
                         Ok(Some(tmp)) => root.push(Rc::new(tmp)),
                         Ok(None) => {},
                         Err(e) => return Err(e),
@@ -103,28 +104,4 @@ fn parse(iter: &mut Iter<Token>, endblock: Option<String>) -> Result<Vec<Rc<Box<
         cur = iter.next();
     }
     Ok(root)
-}
-
-use std::convert::AsRef;
-fn build_expr(name: String, body: String, iter: &mut Iter<Token>) -> Result<Option<Box<Node>>> {
-    match name.as_ref() {
-        "block" => {
-            match parse(iter, Some("endblock".to_string())) {
-                Ok(nodes) => {
-                    Ok(Some(Box::new(BlockNode::new(body, nodes))))
-                },
-                Err(e) => Err(e),
-            }
-        },
-        "extends" => {
-            Ok(Some(Box::new(ExtendsNode::new(body))))
-        },
-        "comment" => {
-            match parse(iter, Some("endcomment".to_string())) {
-                Ok(_) => Ok(None),
-                Err(e) => Err(e),
-            }
-        }
-        _ => Err(Error::new(ErrorKind::Other, format!("Not found tag : {}", name))),
-    }
 }

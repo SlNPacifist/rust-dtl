@@ -20,15 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#[macro_use]
-extern crate mopa;
+use std::io::Result;
+use std::slice::Iter;
 
-mod ast;
-mod context;
-mod filters;
-mod scanner;
-mod tags;
-mod template;
+use ast::Node;
+use ast::ExtendsNode;
+use scanner::Token;
 
-pub use template::Template;
-pub use context::Context;
+pub fn build(body: String, _iter: &mut Iter<Token>) -> Result<Option<Box<Node>>> {
+    Ok(Some(Box::new(ExtendsNode::new(body))))
+}

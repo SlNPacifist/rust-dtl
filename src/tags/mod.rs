@@ -20,15 +20,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#[macro_use]
-extern crate mopa;
+use std::convert::AsRef;
+use std::io::Result;
+use std::io::{Error, ErrorKind};
+use std::slice::Iter;
 
-mod ast;
-mod context;
-mod filters;
-mod scanner;
-mod tags;
-mod template;
+use ast::Node;
+use scanner::Token;
 
-pub use template::Template;
-pub use context::Context;
+mod block;
+mod comment;
+mod extends;
+
+pub fn build(name: String, body: String, iter: &mut Iter<Token>) -> Result<Option<Box<Node>>> {
+    match name.as_ref() {
+        "block" => block::build(body, iter),
+        "extends" => extends::build(body, iter),
+        "comment" => comment::build(body, iter),
+        _ => Err(Error::new(ErrorKind::Other, format!("Not found tag : {}", name))),
+    }
+}
