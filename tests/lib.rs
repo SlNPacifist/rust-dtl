@@ -67,3 +67,19 @@ fn extends_recursive_block() {
     }
     assert_eq!(tpl.render(&ctx), except);
 }
+
+#[test]
+fn include() {
+    let mut except = String::new();
+    let file = File::open("tests/files/except/include");
+    assert!(file.is_ok());
+    assert!(file.unwrap().read_to_string(&mut except).is_ok());
+    let mut ctx = Context::new();
+    ctx.set("var1", Box::new("foostring1"));
+    let mut tpl = Template::new(Path::new("include"), Path::new("tests/files/input/"));
+    match tpl.compile() {
+        Err(e) => panic!(format!("{}", e)),
+        _ => {}
+    }
+    assert_eq!(tpl.render(&ctx), except);
+}
