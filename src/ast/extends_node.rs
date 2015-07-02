@@ -63,12 +63,6 @@ impl Node for ExtendsNode {
     fn node_type(&self) -> NodeType {
         NodeType::Extends
     }
-    fn print(&self, level: u32) {
-        for _ in 0..level {
-            print!("  ");
-        }
-        println!("extends: {:?}", self.name);
-    }
     fn render(&self, _context: &Context) -> String {
         "".to_string()
     }

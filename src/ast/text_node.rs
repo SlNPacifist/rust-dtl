@@ -38,12 +38,6 @@ impl Node for TextNode {
     fn node_type(&self) -> NodeType {
         NodeType::Text
     }
-    fn print(&self, level: u32) {
-        for _ in 0..level {
-            print!("  ");
-        }
-        println!("text: {:?}", self.value);
-    }
     fn render(&self, _context: &Context) -> String {
         self.value.to_string()
     }

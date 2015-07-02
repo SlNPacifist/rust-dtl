@@ -65,12 +65,6 @@ impl Node for IncludeNode {
     fn node_type(&self) -> NodeType {
         NodeType::Include
     }
-    fn print(&self, level: u32) {
-        for _ in 0..level {
-            print!("  ");
-        }
-        println!("include: {:?}", self.name);
-    }
     fn render(&self, ctx: &Context) -> String {
         let mut tpl = Template::new(Path::new(self.name()), Path::new(&format!("{}", ctx.get("___dir").unwrap())));
         match tpl.compile() {

@@ -56,7 +56,6 @@ pub enum NodeType {
 
 pub trait Node: Any {
     fn node_type(&self) -> NodeType;
-    fn print(&self, level: u32);
     fn render(&self, &Context) -> String;
 }
 

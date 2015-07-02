@@ -33,8 +33,6 @@ impl FilterExpression {
         FilterExpression {var: token.content.trim().to_string()}
     }
 
-    pub fn var(&self) -> &str { &self.var }
-
     pub fn render(&self, context: &Context) -> String {
         match context.get(&self.var) {
             Some(val) => format!("{}", val),

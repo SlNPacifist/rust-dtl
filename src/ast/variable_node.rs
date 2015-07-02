@@ -40,12 +40,6 @@ impl Node for VariableNode {
     fn node_type(&self) -> NodeType {
         NodeType::Variable
     }
-    fn print(&self, level: u32) {
-        for _ in 0..level {
-            print!("  ");
-        }
-        println!("var: {:?}", self.expr.var());
-    }
     fn render(&self, context: &Context) -> String {
         self.expr.render(context)
     }

@@ -65,7 +65,6 @@ impl Template {
         try!(file.read_to_string(&mut text));
 
         let tokens = scanner::get_tokens(&text).unwrap();
-        // println!("TOKENS: {:?}", tokens);
 
         match ast::build(tokens) {
             Ok(t) => {
@@ -81,7 +80,6 @@ impl Template {
                             if ast.node_type() == NodeType::Extends {
                                 return Err(Error::new(ErrorKind::Other, "`extends` must be one and at begin!"));
                             }
-                            ast.print(0);
                         }
                         is_extends
                     };
@@ -94,13 +92,13 @@ impl Template {
                                 Some(v) => v,
                                 None => return Err(Error::new(ErrorKind::Other, "`extends` couldn't downcast!")),
                             };
-                            println!("test {:?} {:?}", Path::new(ext.name()), self.dir.as_path());
+                            
                             let mut tpl = Self::new(ext.name(), self.dir.as_path());
                             match tpl.compile() {
                                 Err(e) => return Err(e),
                                 _ => {},
                             }
-                            println!("=== MERGE");
+                            
                             for node in tpl.ast.iter_mut() {
                                 if node.node_type() == NodeType::Block {
                                     for replace in t.iter() {
@@ -124,7 +122,6 @@ impl Template {
                                         }
                                     }
                                 }
-                                node.print(0);
                             }
 
                             Some(tpl.ast)
@@ -149,16 +146,8 @@ impl Template {
         let mut res = String::new();
         for ast in self.ast.iter() {
             res.push_str(&ast.render(&context));
-            println!("#{:?}", ast.render(&context));
         }
         return res;
 
-    }
-
-    pub fn print(&self) {
-        println!("=== PRINT AST:");
-        for node in self.ast.iter() {
-            node.print(0);
-        }
     }
 }
