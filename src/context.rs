@@ -20,14 +20,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#[macro_use]
-extern crate mopa;
+use std::boxed::Box;
+use std::collections::HashMap;
+use std::fmt::Display;
 
-mod ast;
-mod context;
-mod filters;
-mod scanner;
-mod template;
+pub struct Context {
+    dict: HashMap<String, Box<Display>>,
+}
 
-pub use template::Template;
-pub use context::Context;
+impl Context {
+    pub fn new() -> Self {
+        let dict = HashMap::new();
+        Context { dict: dict }
+    }
+    pub fn get(&self, field: &str) -> Option<&Box<Display>> {
+        self.dict.get(field)
+    }
+
+    pub fn set(&mut self, field: &str, value: Box<Display>) {
+        self.dict.insert(field.to_string(), value);
+    }
+}

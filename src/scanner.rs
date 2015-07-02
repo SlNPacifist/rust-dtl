@@ -21,8 +21,8 @@
 // THE SOFTWARE.
 
 use std::fmt::Display;
-use std::fmt::Formatter;
 use std::fmt::Error;
+use std::fmt::Formatter;
 
 #[derive(Clone, Debug)]
 pub enum TokenId {
