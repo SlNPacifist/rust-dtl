@@ -29,7 +29,7 @@ use ast::BlockNode;
 use scanner::Token;
 
 pub fn build(body: String, iter: &mut Iter<Token>) -> Result<Option<Box<Node>>> {
-	match parse(iter, Some("endblock".to_string())) {
+    match parse(iter, Some("endblock".to_string())) {
         Ok(nodes) => {
             Ok(Some(Box::new(BlockNode::new(body, nodes))))
         },

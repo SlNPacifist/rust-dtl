@@ -35,11 +35,13 @@ use tags;
 
 mod block_node;
 mod extends_node;
+mod include_node;
 mod text_node;
 mod variable_node;
 
 pub use self::block_node::BlockNode;
 pub use self::extends_node::ExtendsNode;
+pub use self::include_node::IncludeNode;
 pub use self::text_node::TextNode;
 pub use self::variable_node::VariableNode;
 
@@ -47,6 +49,7 @@ pub use self::variable_node::VariableNode;
 pub enum NodeType {
     Block,
     Extends,
+    Include,
     Text,
     Variable,
 }

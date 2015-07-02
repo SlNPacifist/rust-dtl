@@ -20,12 +20,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+use std::any::Any;
 use std::boxed::Box;
 use std::collections::HashMap;
+use std::fmt::Debug;
 use std::fmt::Display;
 
+pub trait Value: Any + Display + Debug + ValueClone {}
+
+trait ValueClone {
+    fn clone_box(&self) -> Box<Value>;
+}
+
+impl<T> ValueClone for T where T: 'static + Value + Clone {
+    fn clone_box(&self) -> Box<Value> {
+        Box::new(self.clone())
+    }
+}
+
+impl Clone for Box<Value> {
+    fn clone(&self) -> Box<Value> {
+        self.clone_box()
+    }
+}
+
+impl Value for String {}
+
+#[derive(Clone, Debug)]
 pub struct Context {
-    dict: HashMap<String, Box<Display>>,
+    dict: HashMap<String, Box<Value>>,
 }
 
 impl Context {
@@ -33,11 +56,11 @@ impl Context {
         let dict = HashMap::new();
         Context { dict: dict }
     }
-    pub fn get(&self, field: &str) -> Option<&Box<Display>> {
+    pub fn get(&self, field: &str) -> Option<&Box<Value>> {
         self.dict.get(field)
     }
 
-    pub fn set(&mut self, field: &str, value: Box<Display>) {
+    pub fn set(&mut self, field: &str, value: Box<Value>) {
         self.dict.insert(field.to_string(), value);
     }
 }
