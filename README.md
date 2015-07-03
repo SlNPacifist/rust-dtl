@@ -2,7 +2,9 @@ Rust-DTL
 ========
 
 [![Build Status](https://travis-ci.org/tesjin/rust-dtl.svg?branch=master)](https://travis-ci.org/tesjin/rust-dtl)
+[![Coverage Status](https://coveralls.io/repos/tesjin/rust-dtl/badge.svg?branch=master)](https://coveralls.io/r/tesjin/rust-dtl?branch=master)
 [![Crates.io Status](http://meritbadge.herokuapp.com/dtl)](https://crates.io/crates/dtl)
+[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/tesjin/rust-dtl/master/LICENSE)
 
 Rust-DTL compiles Django Template Language.
 
