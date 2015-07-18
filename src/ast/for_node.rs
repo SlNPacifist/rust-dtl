@@ -20,27 +20,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-use std::convert::AsRef;
-use std::io::Result;
-use std::io::{Error, ErrorKind};
-use std::slice::Iter;
+use std::rc::Rc;
 
-use ast::Node;
-use scanner::Token;
+use super::Node;
+use super::NodeType;
+use Context;
 
-mod block;
-mod comment;
-mod extends;
-mod include;
-mod for_tag;
+pub struct ForNode {
+    var_name: String,
+    list_name: String,
+    content: Vec<Rc<Box<Node>>>,
+}
 
-pub fn build(name: String, body: String, iter: &mut Iter<Token>) -> Result<Option<Box<Node>>> {
-    match name.as_ref() {
-        "block" => block::build(body, iter),
-        "extends" => extends::build(body, iter),
-        "include" => include::build(body, iter),
-        "comment" => comment::build(body, iter),
-        "for" => for_tag::build(body, iter),
-        _ => Err(Error::new(ErrorKind::Other, format!("Not found tag : {}", name))),
+impl ForNode {
+    pub fn new(var_name: String, list_name: String, nodes: Vec<Rc<Box<Node>>>) -> Self {
+        ForNode { var_name: var_name, list_name: list_name, content: nodes }
+    }
+}
+
+impl Node for ForNode {
+    fn node_type(&self) -> NodeType {
+        NodeType::For
+    }
+    fn render(&self, context: &Context) -> String {
+        let mut res = String::new();
+        for node in self.content.iter() {
+            res.push_str(&node.render(context));
+        }
+        res
     }
 }

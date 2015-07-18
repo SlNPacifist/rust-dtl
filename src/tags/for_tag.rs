@@ -20,27 +20,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-use std::convert::AsRef;
-use std::io::Result;
-use std::io::{Error, ErrorKind};
+use std::io::{Error, ErrorKind, Result};
 use std::slice::Iter;
 
+use ast::parse;
 use ast::Node;
+use ast::ForNode;
 use scanner::Token;
 
-mod block;
-mod comment;
-mod extends;
-mod include;
-mod for_tag;
+fn parse_args(args: String) -> Result<(String, String)> {
+	let res : Vec<&str> = args.splitn(2, " in ").collect();
+	if res.len() < 2 {
+		return Err(Error::new(ErrorKind::InvalidInput, "Tag 'for' requires format 'for var in list'"));
+	}
+	Ok((res[0].to_string(), res[1].to_string()))
+}
 
-pub fn build(name: String, body: String, iter: &mut Iter<Token>) -> Result<Option<Box<Node>>> {
-    match name.as_ref() {
-        "block" => block::build(body, iter),
-        "extends" => extends::build(body, iter),
-        "include" => include::build(body, iter),
-        "comment" => comment::build(body, iter),
-        "for" => for_tag::build(body, iter),
-        _ => Err(Error::new(ErrorKind::Other, format!("Not found tag : {}", name))),
-    }
+pub fn build(body: String, iter: &mut Iter<Token>) -> Result<Option<Box<Node>>> {
+	match parse_args(body) {
+		Err(e) => Err(e),
+		Ok((var_name, list_name)) => {
+            match parse(iter, Some("endfor".to_string())) {
+                Ok(nodes) => {
+                    Ok(Some(Box::new(ForNode::new(var_name, list_name, nodes))))
+                },
+                Err(e) => Err(e),
+            }
+		}
+	}
 }

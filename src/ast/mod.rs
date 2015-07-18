@@ -38,12 +38,14 @@ mod extends_node;
 mod include_node;
 mod text_node;
 mod variable_node;
+mod for_node;
 
 pub use self::block_node::BlockNode;
 pub use self::extends_node::ExtendsNode;
 pub use self::include_node::IncludeNode;
 pub use self::text_node::TextNode;
 pub use self::variable_node::VariableNode;
+pub use self::for_node::ForNode;
 
 #[derive(PartialEq, PartialOrd)]
 pub enum NodeType {
@@ -52,6 +54,7 @@ pub enum NodeType {
     Include,
     Text,
     Variable,
+    For,
 }
 
 pub trait Node: Any {

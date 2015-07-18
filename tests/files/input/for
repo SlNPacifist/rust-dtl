@@ -1,0 +1,5 @@
+before
+{% for a in b %}
+  str: {{ a }}
+{% endfor %}
+after

@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::Read;
+use std::io::{Read, Write};
 use std::path::Path;
 
 extern crate dtl;
@@ -146,4 +146,16 @@ fn path1() {
         _ => {}
     }
     assert_eq!(tpl.render(&mut ctx), except);
+}
+
+#[test]
+fn for_test() {
+    let mut ctx = Context::new();
+    ctx.set("a", Box::new("base-barstring".to_string()));
+    let mut tpl = Template::new(Path::new("for"), Path::new("tests/files/input/"));
+    match tpl.compile() {
+        Err(e) => panic!(format!("{}", e)),
+        _ => {}
+    }
+    std::io::stdout().write(&tpl.render(&mut ctx).into_bytes());
 }
