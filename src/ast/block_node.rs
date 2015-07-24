@@ -45,7 +45,7 @@ impl Node for BlockNode {
     fn node_type(&self) -> NodeType {
         NodeType::Block
     }
-    fn render(&self, context: &Context) -> String {
+    fn render(&self, context: &mut Context) -> String {
         let mut res = String::new();
         for node in self.content.iter() {
             res.push_str(&node.render(context));

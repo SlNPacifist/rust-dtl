@@ -145,7 +145,7 @@ impl Template {
         context.set("___dir", Box::new(self.dir.as_path().to_str().unwrap_or("").to_string()));
         let mut res = String::new();
         for ast in self.ast.iter() {
-            res.push_str(&ast.render(&context));
+            res.push_str(&ast.render(context));
         }
         return res;
 

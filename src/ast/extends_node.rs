@@ -63,7 +63,7 @@ impl Node for ExtendsNode {
     fn node_type(&self) -> NodeType {
         NodeType::Extends
     }
-    fn render(&self, _context: &Context) -> String {
+    fn render(&self, _context: &mut Context) -> String {
         "".to_string()
     }
 }

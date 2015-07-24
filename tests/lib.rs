@@ -6,6 +6,10 @@ extern crate dtl;
 use dtl::Context;
 use dtl::Template;
 
+mod vec_of_strings;
+use vec_of_strings::VecOfStrings;
+
+
 #[test]
 fn comment() {
     let mut except = String::new();
@@ -151,11 +155,12 @@ fn path1() {
 #[test]
 fn for_test() {
     let mut ctx = Context::new();
-    ctx.set("a", Box::new("base-barstring".to_string()));
+	let strings = VecOfStrings::new(vec!("first", "second", "third"));
+    ctx.set("b", Box::new(strings));
     let mut tpl = Template::new(Path::new("for"), Path::new("tests/files/input/"));
     match tpl.compile() {
         Err(e) => panic!(format!("{}", e)),
         _ => {}
     }
-    std::io::stdout().write(&tpl.render(&mut ctx).into_bytes());
+    let _  = std::io::stdout().write(&tpl.render(&mut ctx).into_bytes());
 }

@@ -1,5 +1,5 @@
 before
 {% for a in b %}
-  str: {{ a }}
+str: {{ a }}
 {% endfor %}
 after

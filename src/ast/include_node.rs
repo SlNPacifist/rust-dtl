@@ -65,7 +65,7 @@ impl Node for IncludeNode {
     fn node_type(&self) -> NodeType {
         NodeType::Include
     }
-    fn render(&self, ctx: &Context) -> String {
+    fn render(&self, ctx: &mut Context) -> String {
         let mut tpl = Template::new(Path::new(self.name()), Path::new(&format!("{}", ctx.get("___dir").unwrap())));
         match tpl.compile() {
             Ok(_) => {},

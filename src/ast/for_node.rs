@@ -42,11 +42,22 @@ impl Node for ForNode {
     fn node_type(&self) -> NodeType {
         NodeType::For
     }
-    fn render(&self, context: &Context) -> String {
+    fn render(&self, context: &mut Context) -> String {
         let mut res = String::new();
-        for node in self.content.iter() {
-            res.push_str(&node.render(context));
+        let children;
+        {
+	        let var = context.get(&self.list_name);
+	        match var {
+	        	None => return format!("no_var {}", self.list_name),
+	        	Some(ref t) => children = t.get_children(),
+	        }
         }
+		for c in children {
+			context.set(&self.var_name, c);
+	        for node in self.content.iter() {
+	            res.push_str(&node.render(context));
+	        }
+		}
         res
     }
 }

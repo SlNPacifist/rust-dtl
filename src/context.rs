@@ -26,7 +26,9 @@ use std::collections::HashMap;
 use std::fmt::Debug;
 use std::fmt::Display;
 
-pub trait Value: Any + Display + Debug + ValueClone {}
+pub trait Value: Any + Display + Debug + ValueClone {
+	fn get_children(&self) -> Vec<Box<Value>>;
+}
 
 trait ValueClone {
     fn clone_box(&self) -> Box<Value>;
@@ -44,7 +46,11 @@ impl Clone for Box<Value> {
     }
 }
 
-impl Value for String {}
+impl Value for String {
+	fn get_children(&self) -> Vec<Box<Value>> {
+		Vec::new()
+	} 
+}
 
 #[derive(Clone, Debug)]
 pub struct Context {

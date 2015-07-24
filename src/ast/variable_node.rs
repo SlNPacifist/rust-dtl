@@ -40,7 +40,7 @@ impl Node for VariableNode {
     fn node_type(&self) -> NodeType {
         NodeType::Variable
     }
-    fn render(&self, context: &Context) -> String {
+    fn render(&self, context: &mut Context) -> String {
         self.expr.render(context)
     }
 }

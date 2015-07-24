@@ -59,7 +59,7 @@ pub enum NodeType {
 
 pub trait Node: Any {
     fn node_type(&self) -> NodeType;
-    fn render(&self, &Context) -> String;
+    fn render(&self, &mut Context) -> String;
 }
 
 mopafy!(Node);

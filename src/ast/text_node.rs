@@ -38,7 +38,7 @@ impl Node for TextNode {
     fn node_type(&self) -> NodeType {
         NodeType::Text
     }
-    fn render(&self, _context: &Context) -> String {
+    fn render(&self, _context: &mut Context) -> String {
         self.value.to_string()
     }
 }

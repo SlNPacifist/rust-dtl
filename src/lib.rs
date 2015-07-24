@@ -32,3 +32,4 @@ mod template;
 
 pub use template::Template;
 pub use context::Context;
+pub use context::Value;
