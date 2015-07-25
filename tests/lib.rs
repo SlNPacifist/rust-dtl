@@ -154,6 +154,10 @@ fn path1() {
 
 #[test]
 fn for_test() {
+    let mut except = String::new();
+    let file = File::open("tests/files/except/for");
+    assert!(file.is_ok());
+    assert!(file.unwrap().read_to_string(&mut except).is_ok());
     let mut ctx = Context::new();
 	let strings = VecOfStrings::new(vec!("first", "second", "third"));
     ctx.set("b", Box::new(strings));
@@ -162,5 +166,5 @@ fn for_test() {
         Err(e) => panic!(format!("{}", e)),
         _ => {}
     }
-    let _  = std::io::stdout().write(&tpl.render(&mut ctx).into_bytes());
+    assert_eq!(tpl.render(&mut ctx), except);
 }
