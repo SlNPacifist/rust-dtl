@@ -28,6 +28,7 @@ use std::fmt::Display;
 
 pub trait Value: Any + Display + Debug + ValueClone {
 	fn get_children(&self) -> Vec<Box<Value>>;
+	fn get_property(&self, name: &str) -> Option<Box<Value>>;
 }
 
 trait ValueClone {
@@ -49,7 +50,11 @@ impl Clone for Box<Value> {
 impl Value for String {
 	fn get_children(&self) -> Vec<Box<Value>> {
 		Vec::new()
-	} 
+	}
+	
+	fn get_property(&self, name: &str) -> Option<Box<Value>> {
+		None
+	}
 }
 
 #[derive(Clone, Debug)]
@@ -62,8 +67,26 @@ impl Context {
         let dict = HashMap::new();
         Context { dict: dict }
     }
-    pub fn get(&self, field: &str) -> Option<&Box<Value>> {
-        self.dict.get(field)
+    pub fn get(&mut self, field: &str) -> Option<&Box<Value>> {
+    	{
+	        let res = self.dict.get(field);
+	        if let Some(a) = res { return res }
+        }
+		let mut splitter = field.split('.');
+		if let Some(var) = self.dict.get(splitter.next().unwrap()) {
+			if let Some(part) = splitter.next() {
+    			if let Some(mut prop) = var.get_property(part) {
+	        		while let Some(part) = splitter.next() {
+	        			match prop.get_property(part) {
+	        				None => { return None; },
+	        				Some(tmp) => { prop = tmp; }
+	        			}
+	        		}
+	        		return Some(prop);
+    			}
+			}
+		}
+		None
     }
 
     pub fn set(&mut self, field: &str, value: Box<Value>) {
