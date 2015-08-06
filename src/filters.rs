@@ -34,9 +34,9 @@ impl FilterExpression {
         FilterExpression {var: token.content.trim().to_string()}
     }
 
-    pub fn render(&self, context: &Context) -> String {
+    pub fn render(&self, context: &Context, storage: &mut Vec<String>) -> String {
         match context.get(&self.var) {
-            Some(val) => val.as_string_ref().to_string(),
+            Some(val) => val.as_string_ref(storage).to_string(),
             None => String::new(),
         }
     }

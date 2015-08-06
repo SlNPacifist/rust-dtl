@@ -1,7 +1,7 @@
 use value::{Value, ValueAsStringByRef, ValueAsIterator, ValueAsObject};
 
 impl ValueAsStringByRef for String {
-	fn as_string_ref(&self) -> &str {
+	fn as_string_ref(&self, _: &mut Vec<String>) -> &str {
 		&self
 	}
 }

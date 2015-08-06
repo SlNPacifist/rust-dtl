@@ -3,7 +3,7 @@ use std::io::Read;
 use std::path::Path;
 
 extern crate dtl;
-use dtl::{Node, Template, Context, HashMapContext};
+use dtl::{Template, Context, HashMapContext};
 
 mod vec_of_strings;
 use vec_of_strings::VecOfStrings;

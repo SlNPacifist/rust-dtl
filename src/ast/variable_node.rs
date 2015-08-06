@@ -37,7 +37,7 @@ impl VariableNode {
 }
 
 impl Node for VariableNode {
-    fn render(&self, context: &Context) -> String {
-        self.expr.render(context)
+    fn render(&self, context: &Context, storage: &mut Vec<String>) -> String {
+        self.expr.render(context, storage)
     }
 }

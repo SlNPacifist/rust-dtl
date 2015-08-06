@@ -53,20 +53,20 @@ pub enum NodeType {
 }
 
 impl Node for NodeType {
-	fn render(&self, c: &Context) -> String {
+	fn render(&self, c: &Context, s: &mut Vec<String>) -> String {
 		match self {
-			&NodeType::Block(ref block) => block.render(c),
-			&NodeType::Extends(ref ext) => ext.render(c),
-			&NodeType::Include(ref inc) => inc.render(c),
-			&NodeType::Text(ref text) => text.render(c),
-			&NodeType::Variable(ref var) => var.render(c),
-			&NodeType::For(ref for_node) => for_node.render(c),
+			&NodeType::Block(ref block) => block.render(c, s),
+			&NodeType::Extends(ref ext) => ext.render(c, s),
+			&NodeType::Include(ref inc) => inc.render(c, s),
+			&NodeType::Text(ref text) => text.render(c, s),
+			&NodeType::Variable(ref var) => var.render(c, s),
+			&NodeType::For(ref for_node) => for_node.render(c, s),
 		}
 	}
 }
 
 pub trait Node {
-    fn render(&self, &Context) -> String;
+    fn render(&self, &Context, &mut Vec<String>) -> String;
 }
 
 pub fn build(tokens: Vec<Token>) -> Result<Vec<NodeType>> {

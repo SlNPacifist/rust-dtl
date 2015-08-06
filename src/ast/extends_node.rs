@@ -60,7 +60,7 @@ impl ExtendsNode {
 }
 
 impl Node for ExtendsNode {
-    fn render(&self, _context: &Context) -> String {
+    fn render(&self, _context: &Context, _: &mut Vec<String>) -> String {
         "".to_string()
     }
 }

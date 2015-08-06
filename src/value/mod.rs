@@ -2,7 +2,18 @@ mod default_impls;
 use std::fmt::Debug;
 
 pub trait ValueAsStringByRef {
-	fn as_string_ref(&self) -> &str;
+	fn as_string_ref<'a>(&'a self, storage: &'a mut Vec<String>) -> &'a str;
+}
+
+pub trait ValueAsString {
+	fn as_string(&self) -> String;
+}
+
+impl<T> ValueAsStringByRef for T where T: ValueAsString {
+	fn as_string_ref<'a>(&'a self, storage: &'a mut Vec<String>) -> &'a str {
+		storage.push(self.as_string());
+		storage.last().unwrap()
+	}
 }
 
 pub trait ValueAsIterator {

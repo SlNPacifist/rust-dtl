@@ -1,5 +1,5 @@
 extern crate dtl;
-use dtl::{Value, ValueAsStringByRef, ValueAsIterator, ValueAsObject};
+use dtl::{Value, ValueAsString, ValueAsIterator, ValueAsObject};
 
 #[derive(Debug, Clone)]
 pub struct VecOfStrings {
@@ -20,9 +20,9 @@ fn string_to_value(s: &String) -> &Value {
 	s
 }
 
-impl ValueAsStringByRef for VecOfStrings {
-	fn as_string_ref(&self) -> &str {
-		"none"
+impl ValueAsString for VecOfStrings {
+	fn as_string(&self) -> String {
+		format!("VecOfStrings({} elements)", self.children.len())
 	}
 }
 

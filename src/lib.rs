@@ -30,5 +30,5 @@ mod value;
 
 pub use template::Template;
 pub use context::{Context, HashMapContext, MultiContext};
-pub use value::{Value, ValueAsStringByRef, ValueAsIterator, ValueAsObject};
+pub use value::{Value, ValueAsStringByRef, ValueAsString, ValueAsIterator, ValueAsObject};
 pub use ast::Node;

@@ -114,16 +114,14 @@ impl Template {
 		};
         Ok(())
     }
-}
-
-impl Node for Template {
-    fn render(&self, context: &Context) -> String {
+    pub fn render(&self, context: &Context) -> String {
     	let mut common_context = MultiContext::new();
+    	let mut storage = Vec::new();
     	common_context.add(context);
         common_context.set("___dir", Box::new(self.dir.as_path().to_str().unwrap_or("").to_string()));
         let mut res = String::new();
         for ast in self.ast.iter() {
-            res.push_str(&ast.render(&common_context));
+            res.push_str(&ast.render(&common_context, &mut storage));
         }
         return res;
     }

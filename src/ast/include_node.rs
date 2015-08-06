@@ -62,8 +62,9 @@ impl IncludeNode {
 }
 
 impl Node for IncludeNode {
-    fn render(&self, ctx: &Context) -> String {
-        let mut tpl = Template::new(Path::new(self.name()), Path::new(ctx.get("___dir").unwrap().as_string_ref()));
+    fn render(&self, ctx: &Context, storage: &mut Vec<String>) -> String {
+    	let dir = ctx.get("___dir").unwrap().as_string_ref(storage);
+        let mut tpl = Template::new(Path::new(self.name()), Path::new(dir));
         match tpl.compile() {
             Ok(_) => {},
             Err(e) => panic!(e),

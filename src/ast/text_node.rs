@@ -35,7 +35,7 @@ impl TextNode {
 }
 
 impl Node for TextNode {
-    fn render(&self, _context: &Context) -> String {
+    fn render(&self, _context: &Context, _: &mut Vec<String>) -> String {
         self.value.to_string()
     }
 }

@@ -37,7 +37,7 @@ impl ForNode {
 }
 
 impl Node for ForNode {
-    fn render(&self, context: &Context) -> String {
+    fn render(&self, context: &Context, storage: &mut Vec<String>) -> String {
         let mut res = String::new();
         let children;
         {
@@ -53,7 +53,7 @@ impl Node for ForNode {
 			for child in c {
 				combined.set(&self.var_name, child.clone_box());
 		        for node in self.content.iter() {
-		            res.push_str(&node.render(&combined));
+		            res.push_str(&node.render(&combined, storage));
 		        }
 			}
 		}
