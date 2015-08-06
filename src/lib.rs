@@ -30,6 +30,6 @@ mod value;
 
 pub use template::Template;
 pub use context::{Context, HashMapContext, MultiContext};
-pub use value::{Value, ValueAsStringByRef, ValueAsString, ValueAsIterator, ValueAsObject};
+pub use value::{Value, ValueAsStringByRef, ValueAsString, ValueAsIterator, ValueAsObject, ValueAsBool};
 pub use value::helpers::value_to_trait_object;
 pub use ast::Node;

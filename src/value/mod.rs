@@ -25,6 +25,10 @@ pub trait ValueAsObject {
 	fn get_property(&self, name: &str) -> Option<&Value>;
 }
 
+pub trait ValueAsBool {
+	fn as_bool(&self) -> bool;
+}
+
 pub trait ValueClone {
     fn clone_box(&self) -> Box<Value>;
 }
@@ -42,5 +46,5 @@ impl Clone for Box<Value> {
 }
 
 // We cannot use Clone trait here because it will cause trait to be not object-safe
-pub trait Value: ValueAsStringByRef + ValueAsIterator + ValueAsObject + ValueClone + Debug {}
-impl<T> Value for T where T: ValueAsStringByRef + ValueAsIterator + ValueAsObject + ValueClone + Debug {}
+pub trait Value: ValueAsStringByRef + ValueAsIterator + ValueAsObject + ValueAsBool + ValueClone + Debug {}
+impl<T> Value for T where T: ValueAsStringByRef + ValueAsIterator + ValueAsObject + ValueAsBool+ ValueClone + Debug {}

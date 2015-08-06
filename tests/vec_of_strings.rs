@@ -1,5 +1,5 @@
 extern crate dtl;
-use dtl::{Value, ValueAsString, ValueAsIterator, ValueAsObject, value_to_trait_object};
+use dtl::{Value, ValueAsString, ValueAsIterator, ValueAsObject, ValueAsBool, value_to_trait_object};
 
 #[derive(Debug, Clone)]
 pub struct VecOfStrings {
@@ -31,5 +31,11 @@ impl ValueAsIterator for VecOfStrings {
 impl ValueAsObject for VecOfStrings {
 	fn get_property(&self, _: &str) -> Option<&Value> {
 		None
+	}
+}
+
+impl ValueAsBool for VecOfStrings {
+	fn as_bool(&self) -> bool {
+		self.children.len() > 0
 	}
 }
