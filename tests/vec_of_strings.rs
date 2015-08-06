@@ -1,5 +1,5 @@
 extern crate dtl;
-use dtl::{Value, ValueAsString, ValueAsIterator, ValueAsObject};
+use dtl::{Value, ValueAsString, ValueAsIterator, ValueAsObject, value_to_trait_object};
 
 #[derive(Debug, Clone)]
 pub struct VecOfStrings {
@@ -16,10 +16,6 @@ impl VecOfStrings {
 	}
 }
 
-fn string_to_value(s: &String) -> &Value {
-	s
-}
-
 impl ValueAsString for VecOfStrings {
 	fn as_string(&self) -> String {
 		format!("VecOfStrings({} elements)", self.children.len())
@@ -28,7 +24,7 @@ impl ValueAsString for VecOfStrings {
 
 impl ValueAsIterator for VecOfStrings {
 	fn get_iterator<'a>(&'a self) -> Option<Box<Iterator<Item=&Value> + 'a>> {
-		Some(Box::new(self.children.iter().map(string_to_value)))
+		Some(Box::new(self.children.iter().map(value_to_trait_object)))
 	} 
 }
 
