@@ -25,7 +25,7 @@ use std::io::Result;
 use std::io::{Error, ErrorKind};
 use std::slice::Iter;
 
-use ast::Node;
+use ast::NodeType;
 use scanner::Token;
 
 mod block;
@@ -34,7 +34,7 @@ mod extends;
 mod include;
 mod for_tag;
 
-pub fn build(name: String, body: String, iter: &mut Iter<Token>) -> Result<Option<Box<Node>>> {
+pub fn build(name: String, body: String, iter: &mut Iter<Token>) -> Result<Option<NodeType>> {
     match name.as_ref() {
         "block" => block::build(body, iter),
         "extends" => extends::build(body, iter),

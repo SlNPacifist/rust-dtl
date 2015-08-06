@@ -23,9 +23,9 @@
 use scanner::Token;
 use filters::FilterExpression;
 use super::Node;
-use super::NodeType;
 use Context;
 
+#[derive(Clone)]
 pub struct VariableNode {
     expr: FilterExpression,
 }
@@ -37,10 +37,7 @@ impl VariableNode {
 }
 
 impl Node for VariableNode {
-    fn node_type(&self) -> NodeType {
-        NodeType::Variable
-    }
-    fn render(&self, context: &mut Context) -> String {
+    fn render(&self, context: &Context) -> String {
         self.expr.render(context)
     }
 }

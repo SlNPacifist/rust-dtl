@@ -23,10 +23,10 @@
 use std::io::Result;
 use std::slice::Iter;
 
-use ast::Node;
+use ast::NodeType;
 use ast::ExtendsNode;
 use scanner::Token;
 
-pub fn build(body: String, _iter: &mut Iter<Token>) -> Result<Option<Box<Node>>> {
-    Ok(Some(Box::new(ExtendsNode::new(body))))
+pub fn build(body: String, _iter: &mut Iter<Token>) -> Result<Option<NodeType>> {
+    Ok(Some(NodeType::Extends(ExtendsNode::new(body))))
 }

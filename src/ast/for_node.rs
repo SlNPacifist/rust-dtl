@@ -20,43 +20,42 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-use std::rc::Rc;
+use super::{Node, NodeType};
+use context::{Context, MultiContext};
 
-use super::Node;
-use super::NodeType;
-use Context;
-
+#[derive(Clone)]
 pub struct ForNode {
     var_name: String,
     list_name: String,
-    content: Vec<Rc<Box<Node>>>,
+    content: Vec<NodeType>,
 }
 
 impl ForNode {
-    pub fn new(var_name: String, list_name: String, nodes: Vec<Rc<Box<Node>>>) -> Self {
+    pub fn new(var_name: String, list_name: String, nodes: Vec<NodeType>) -> Self {
         ForNode { var_name: var_name, list_name: list_name, content: nodes }
     }
 }
 
 impl Node for ForNode {
-    fn node_type(&self) -> NodeType {
-        NodeType::For
-    }
-    fn render(&self, context: &mut Context) -> String {
+    fn render(&self, context: &Context) -> String {
         let mut res = String::new();
         let children;
         {
 	        let var = context.get(&self.list_name);
 	        match var {
 	        	None => return format!("no_var {}", self.list_name),
-	        	Some(ref t) => children = t.get_children(),
+	        	Some(t) => children = t.get_iterator(),
 	        }
         }
-		for c in children {
-			context.set(&self.var_name, c);
-	        for node in self.content.iter() {
-	            res.push_str(&node.render(context));
-	        }
+        if let Some(c) = children {
+        	let mut combined = MultiContext::new();
+        	combined.add(context);
+			for child in c {
+				combined.set(&self.var_name, child.clone_box());
+		        for node in self.content.iter() {
+		            res.push_str(&node.render(&combined));
+		        }
+			}
 		}
         res
     }

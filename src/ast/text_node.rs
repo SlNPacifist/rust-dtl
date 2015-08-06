@@ -21,9 +21,9 @@
 // THE SOFTWARE.
 
 use super::Node;
-use super::NodeType;
 use super::super::Context;
 
+#[derive(Clone)]
 pub struct TextNode {
     value: String,
 }
@@ -35,10 +35,7 @@ impl TextNode {
 }
 
 impl Node for TextNode {
-    fn node_type(&self) -> NodeType {
-        NodeType::Text
-    }
-    fn render(&self, _context: &mut Context) -> String {
+    fn render(&self, _context: &Context) -> String {
         self.value.to_string()
     }
 }

@@ -1,8 +1,7 @@
 extern crate dtl;
-use dtl::Value;
-use std::fmt;
+use dtl::{Value, ValueAsStringByRef, ValueAsIterator, ValueAsObject};
 
-#[derive(Clone, Debug)]
+#[derive(Debug, Clone)]
 pub struct VecOfStrings {
 	pub children: Vec<String> 
 }
@@ -17,18 +16,24 @@ impl VecOfStrings {
 	}
 }
 
-impl fmt::Display for VecOfStrings {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "VecOfStrings({})", self.children.len())
-    }
+fn string_to_value(s: &String) -> &Value {
+	s
 }
 
-fn box_string(s: &String) -> Box<Value> {
-	Box::new(s.clone())
+impl ValueAsStringByRef for VecOfStrings {
+	fn as_string_ref(&self) -> &str {
+		"none"
+	}
 }
 
-impl Value for VecOfStrings {
-	fn get_children(&self) -> Vec<Box<Value>> {
-		self.children.iter().map(box_string).collect()
+impl ValueAsIterator for VecOfStrings {
+	fn get_iterator<'a>(&'a self) -> Option<Box<Iterator<Item=&Value> + 'a>> {
+		Some(Box::new(self.children.iter().map(string_to_value)))
 	} 
+}
+
+impl ValueAsObject for VecOfStrings {
+	fn get_property(&self, _: &str) -> Option<&Value> {
+		None
+	}
 }

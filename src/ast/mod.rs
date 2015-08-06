@@ -21,15 +21,10 @@
 // THE SOFTWARE.
 
 use std::vec::Vec;
-use std::boxed::Box;
-use std::io::Result;
-use std::io::{Error, ErrorKind};
-use std::rc::Rc;
+use std::io::{Result, Error, ErrorKind};
 use std::slice::Iter;
-use mopa::Any;
 
-use scanner::Token;
-use scanner::TokenId;
+pub use scanner::{Token, TokenId};
 use super::Context;
 use tags;
 
@@ -47,41 +42,51 @@ pub use self::text_node::TextNode;
 pub use self::variable_node::VariableNode;
 pub use self::for_node::ForNode;
 
-#[derive(PartialEq, PartialOrd)]
+#[derive(Clone)]
 pub enum NodeType {
-    Block,
-    Extends,
-    Include,
-    Text,
-    Variable,
-    For,
+    Block(BlockNode),
+    Extends(ExtendsNode),
+    Include(IncludeNode),
+    Text(TextNode),
+    Variable(VariableNode),
+    For(ForNode),
 }
 
-pub trait Node: Any {
-    fn node_type(&self) -> NodeType;
-    fn render(&self, &mut Context) -> String;
+impl Node for NodeType {
+	fn render(&self, c: &Context) -> String {
+		match self {
+			&NodeType::Block(ref block) => block.render(c),
+			&NodeType::Extends(ref ext) => ext.render(c),
+			&NodeType::Include(ref inc) => inc.render(c),
+			&NodeType::Text(ref text) => text.render(c),
+			&NodeType::Variable(ref var) => var.render(c),
+			&NodeType::For(ref for_node) => for_node.render(c),
+		}
+	}
 }
 
-mopafy!(Node);
+pub trait Node {
+    fn render(&self, &Context) -> String;
+}
 
-pub fn build(tokens: Vec<Token>) -> Result<Vec<Rc<Box<Node>>>> {
+pub fn build(tokens: Vec<Token>) -> Result<Vec<NodeType>> {
     parse(&mut tokens.iter(), None)
 }
 
-pub fn parse(iter: &mut Iter<Token>, endblock: Option<String>) -> Result<Vec<Rc<Box<Node>>>> {
-    let mut root: Vec<Rc<Box<Node>>> = Vec::new();
+pub fn parse(iter: &mut Iter<Token>, endblock: Option<String>) -> Result<Vec<NodeType>> {
+    let mut root: Vec<NodeType> = Vec::new();
     let mut cur = iter.next();
     while cur.is_some() {
         let tkn = cur.unwrap();
         match tkn.id {
             TokenId::Text => {
                 let tmp = TextNode::new(&tkn.content);
-                root.push(Rc::new(Box::new(tmp)));
+                root.push(NodeType::Text(tmp));
             },
             TokenId::Variable => {
                 if tkn.content.trim().len() > 0 {
                     let tmp = VariableNode::new(tkn);
-                    root.push(Rc::new(Box::new(tmp)));
+                    root.push(NodeType::Variable(tmp));
                 } else {
                     return Err(Error::new(ErrorKind::InvalidInput, "Empty variable tag"));
                 }
@@ -97,7 +102,7 @@ pub fn parse(iter: &mut Iter<Token>, endblock: Option<String>) -> Result<Vec<Rc<
                         return Ok(root);
                     }
                     match tags::build(cmd, body, iter) {
-                        Ok(Some(tmp)) => root.push(Rc::new(tmp)),
+                        Ok(Some(tmp)) => root.push(tmp),
                         Ok(None) => {},
                         Err(e) => return Err(e),
                     };

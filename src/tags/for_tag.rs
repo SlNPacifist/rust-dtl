@@ -24,7 +24,7 @@ use std::io::{Error, ErrorKind, Result};
 use std::slice::Iter;
 
 use ast::parse;
-use ast::Node;
+use ast::NodeType;
 use ast::ForNode;
 use scanner::Token;
 
@@ -36,13 +36,13 @@ fn parse_args(args: String) -> Result<(String, String)> {
 	Ok((res[0].to_string(), res[1].to_string()))
 }
 
-pub fn build(body: String, iter: &mut Iter<Token>) -> Result<Option<Box<Node>>> {
+pub fn build(body: String, iter: &mut Iter<Token>) -> Result<Option<NodeType>> {
 	match parse_args(body) {
 		Err(e) => Err(e),
 		Ok((var_name, list_name)) => {
             match parse(iter, Some("endfor".to_string())) {
                 Ok(nodes) => {
-                    Ok(Some(Box::new(ForNode::new(var_name, list_name, nodes))))
+                    Ok(Some(NodeType::For(ForNode::new(var_name, list_name, nodes))))
                 },
                 Err(e) => Err(e),
             }

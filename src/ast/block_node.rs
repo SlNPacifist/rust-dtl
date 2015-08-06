@@ -20,19 +20,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-use std::rc::Rc;
-
-use super::Node;
-use super::NodeType;
+use super::{Node, NodeType};
 use Context;
 
+#[derive(Clone)]
 pub struct BlockNode {
-    name: String,
-    content: Vec<Rc<Box<Node>>>,
+    pub name: String,
+    pub content: Vec<NodeType>,
 }
 
 impl BlockNode {
-    pub fn new(name: String, nodes: Vec<Rc<Box<Node>>>) -> Self {
+    pub fn new(name: String, nodes: Vec<NodeType>) -> Self {
         BlockNode { name: name, content: nodes }
     }
 
@@ -42,10 +40,7 @@ impl BlockNode {
 }
 
 impl Node for BlockNode {
-    fn node_type(&self) -> NodeType {
-        NodeType::Block
-    }
-    fn render(&self, context: &mut Context) -> String {
+    fn render(&self, context: &Context) -> String {
         let mut res = String::new();
         for node in self.content.iter() {
             res.push_str(&node.render(context));

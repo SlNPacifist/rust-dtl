@@ -24,10 +24,10 @@ use std::io::Result;
 use std::slice::Iter;
 
 use ast::parse;
-use ast::Node;
+use ast::NodeType;
 use scanner::Token;
 
-pub fn build(_body: String, iter: &mut Iter<Token>) -> Result<Option<Box<Node>>> {
+pub fn build(_body: String, iter: &mut Iter<Token>) -> Result<Option<NodeType>> {
     match parse(iter, Some("endcomment".to_string())) {
         Ok(_) => Ok(None),
         Err(e) => Err(e),

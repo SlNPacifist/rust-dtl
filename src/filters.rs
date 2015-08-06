@@ -23,6 +23,7 @@
 use Context;
 use scanner::Token;
 
+#[derive(Clone)]
 pub struct FilterExpression {
     var: String,
     //filters: 
@@ -35,7 +36,7 @@ impl FilterExpression {
 
     pub fn render(&self, context: &Context) -> String {
         match context.get(&self.var) {
-            Some(val) => format!("{}", val),
+            Some(val) => val.as_string_ref().to_string(),
             None => String::new(),
         }
     }

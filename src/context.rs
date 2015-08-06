@@ -20,57 +20,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-use std::any::Any;
 use std::boxed::Box;
 use std::collections::HashMap;
-use std::fmt::Debug;
-use std::fmt::Display;
+use value::Value;
+use std::ops::Deref;
 
-pub trait Value: Any + Display + Debug + ValueClone {
-	fn get_children(&self) -> Vec<Box<Value>>;
-	fn get_property(&self, name: &str) -> Option<Box<Value>>;
-}
-
-trait ValueClone {
-    fn clone_box(&self) -> Box<Value>;
-}
-
-impl<T> ValueClone for T where T: 'static + Value + Clone {
-    fn clone_box(&self) -> Box<Value> {
-        Box::new(self.clone())
-    }
-}
-
-impl Clone for Box<Value> {
-    fn clone(&self) -> Box<Value> {
-        self.clone_box()
-    }
-}
-
-impl Value for String {
-	fn get_children(&self) -> Vec<Box<Value>> {
-		Vec::new()
-	}
-	
-	fn get_property(&self, name: &str) -> Option<Box<Value>> {
-		None
-	}
+pub trait Context {
+    fn get(&self, field: &str) -> Option<&Value>;
+    fn set(&mut self, field: &str, value: Box<Value>);
 }
 
 #[derive(Clone, Debug)]
-pub struct Context {
+pub struct HashMapContext {
     dict: HashMap<String, Box<Value>>,
 }
 
-impl Context {
+impl HashMapContext {
     pub fn new() -> Self {
-        let dict = HashMap::new();
-        Context { dict: dict }
+        HashMapContext { dict: HashMap::new() }
     }
-    pub fn get(&mut self, field: &str) -> Option<&Box<Value>> {
+}
+
+impl Context for HashMapContext {
+    fn get(&self, field: &str) -> Option<&Value> {
     	{
 	        let res = self.dict.get(field);
-	        if let Some(a) = res { return res }
+	        if let Some(a) = res { return Some(a.deref()) }
         }
 		let mut splitter = field.split('.');
 		if let Some(var) = self.dict.get(splitter.next().unwrap()) {
@@ -89,7 +64,44 @@ impl Context {
 		None
     }
 
-    pub fn set(&mut self, field: &str, value: Box<Value>) {
+    fn set(&mut self, field: &str, value: Box<Value>) {
         self.dict.insert(field.to_string(), value);
+    }
+}
+
+
+pub struct MultiContext<'a> {
+	default_context: HashMapContext,
+	contexts: Vec<&'a Context>,
+}
+
+impl<'a> MultiContext<'a> {
+	pub fn new() -> MultiContext<'a> {
+		MultiContext {
+			default_context: HashMapContext::new(),
+			contexts: Vec::new(),
+		}
+	}
+
+	pub fn add(&mut self, c: &'a Context) {
+		self.contexts.push(c);
+	}
+}
+
+impl<'a> Context for MultiContext<'a> {
+    fn get(&self, field: &str) -> Option<&Value> {
+		if let Some(v) = self.default_context.get(field) {
+			return Some(v)
+		}
+    	for c in self.contexts.iter() {
+    		if let Some(v) = c.get(field) {
+    			return Some(v)
+    		}
+    	}
+    	None
+    }
+    
+    fn set(&mut self, field: &str, value: Box<Value>) {
+    	self.default_context.set(field, value);
     }
 }

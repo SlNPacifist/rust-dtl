@@ -1,10 +1,9 @@
 use std::fs::File;
-use std::io::{Read, Write};
+use std::io::Read;
 use std::path::Path;
 
 extern crate dtl;
-use dtl::Context;
-use dtl::Template;
+use dtl::{Node, Template, Context, HashMapContext};
 
 mod vec_of_strings;
 use vec_of_strings::VecOfStrings;
@@ -16,7 +15,7 @@ fn comment() {
     let file = File::open("tests/files/except/comment");
     assert!(file.is_ok());
     assert!(file.unwrap().read_to_string(&mut except).is_ok());
-    let mut ctx = Context::new();
+    let mut ctx = HashMapContext::new();
     let mut tpl = Template::new(Path::new("comment"), Path::new("tests/files/input/"));
     match tpl.compile() {
         Err(e) => panic!(format!("{}", e)),
@@ -31,7 +30,7 @@ fn extends() {
     let file = File::open("tests/files/except/extends");
     assert!(file.is_ok());
     assert!(file.unwrap().read_to_string(&mut except).is_ok());
-    let mut ctx = Context::new();
+    let mut ctx = HashMapContext::new();
     ctx.set("base_var", Box::new("base-barstring".to_string()));
     ctx.set("test_var", Box::new("test-barstring".to_string()));
     let mut tpl = Template::new(Path::new("extends"), Path::new("tests/files/input/"));
@@ -48,7 +47,7 @@ fn extends4() {
     let file = File::open("tests/files/except/extends4");
     assert!(file.is_ok());
     assert!(file.unwrap().read_to_string(&mut except).is_ok());
-    let mut ctx = Context::new();
+    let mut ctx = HashMapContext::new();
     let mut tpl = Template::new(Path::new("extends4"), Path::new("tests/files/input/"));
     match tpl.compile() {
         Err(e) => panic!(format!("{}", e)),
@@ -63,7 +62,7 @@ fn extends_path() {
     let file = File::open("tests/files/except/extends_path");
     assert!(file.is_ok());
     assert!(file.unwrap().read_to_string(&mut except).is_ok());
-    let mut ctx = Context::new();
+    let mut ctx = HashMapContext::new();
     ctx.set("base_var", Box::new("base-barstring".to_string()));
     ctx.set("test_var", Box::new("test-barstring".to_string()));
     let mut tpl = Template::new(Path::new("extends_path"), Path::new("tests/files/input/"));
@@ -80,7 +79,7 @@ fn extends_path2() {
     let file = File::open("tests/files/except/extends_path2");
     assert!(file.is_ok());
     assert!(file.unwrap().read_to_string(&mut except).is_ok());
-    let mut ctx = Context::new();
+    let mut ctx = HashMapContext::new();
     let mut tpl = Template::new(Path::new("extends_path2"), Path::new("tests/files/input/"));
     match tpl.compile() {
         Err(e) => panic!(format!("{}", e)),
@@ -95,7 +94,7 @@ fn extends_recursive_block() {
     let file = File::open("tests/files/except/extends_recursive_block");
     assert!(file.is_ok());
     assert!(file.unwrap().read_to_string(&mut except).is_ok());
-    let mut ctx = Context::new();
+    let mut ctx = HashMapContext::new();
     let mut tpl = Template::new(Path::new("extends_recursive_block"), Path::new("tests/files/input/"));
     match tpl.compile() {
         Err(e) => panic!(format!("{}", e)),
@@ -110,7 +109,7 @@ fn include() {
     let file = File::open("tests/files/except/include");
     assert!(file.is_ok());
     assert!(file.unwrap().read_to_string(&mut except).is_ok());
-    let mut ctx = Context::new();
+    let mut ctx = HashMapContext::new();
     ctx.set("var1", Box::new("foostring1".to_string()));
     let mut tpl = Template::new(Path::new("include"), Path::new("tests/files/input/"));
     match tpl.compile() {
@@ -126,7 +125,7 @@ fn include_template() {
     let file = File::open("tests/files/except/include_template");
     assert!(file.is_ok());
     assert!(file.unwrap().read_to_string(&mut except).is_ok());
-    let mut ctx = Context::new();
+    let mut ctx = HashMapContext::new();
     ctx.set("base_var", Box::new("base-barstring".to_string()));
     ctx.set("test_var", Box::new("test-barstring".to_string()));
     let mut tpl = Template::new(Path::new("include_template"), Path::new("tests/files/input/"));
@@ -143,7 +142,7 @@ fn path1() {
     let file = File::open("tests/files/except/path1");
     assert!(file.is_ok());
     assert!(file.unwrap().read_to_string(&mut except).is_ok());
-    let mut ctx = Context::new();
+    let mut ctx = HashMapContext::new();
     let mut tpl = Template::new(Path::new("path1/base1"), Path::new("tests/files/input/"));
     match tpl.compile() {
         Err(e) => panic!(format!("{}", e)),
@@ -158,7 +157,7 @@ fn for_test() {
     let file = File::open("tests/files/except/for");
     assert!(file.is_ok());
     assert!(file.unwrap().read_to_string(&mut except).is_ok());
-    let mut ctx = Context::new();
+    let mut ctx = HashMapContext::new();
 	let strings = VecOfStrings::new(vec!("first", "second", "third"));
     ctx.set("b", Box::new(strings));
     let mut tpl = Template::new(Path::new("for"), Path::new("tests/files/input/"));

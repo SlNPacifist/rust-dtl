@@ -7,6 +7,3 @@ authors = ["Vladislav Orlov <orlov@tesjin.ru>"]
 repository = "https://github.com/tesjin/rust-dtl"
 readme = "README.md"
 license = "MIT"
-
-[dependencies]
-mopa = "*"

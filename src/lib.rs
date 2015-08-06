@@ -20,16 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#[macro_use]
-extern crate mopa;
-
 mod ast;
 mod context;
 mod filters;
 mod scanner;
 mod tags;
 mod template;
+mod value;
 
 pub use template::Template;
-pub use context::Context;
-pub use context::Value;
+pub use context::{Context, HashMapContext, MultiContext};
+pub use value::{Value, ValueAsStringByRef, ValueAsIterator, ValueAsObject};
+pub use ast::Node;

@@ -21,19 +21,19 @@
 // THE SOFTWARE.
 
 use super::Node;
-use super::NodeType;
 use std::path::Path;
-use Context;
+use context::{HashMapContext, Context};
 use Template;
 
+#[derive(Clone)]
 pub struct IncludeNode {
     name: String,
-    context: Option<Context>,
+    context: Option<HashMapContext>,
     dynamic: bool,
 }
 
 impl IncludeNode {
-    pub fn new(name: String, ctx: Option<Context>) -> IncludeNode {
+    pub fn new(name: String, ctx: Option<HashMapContext>) -> IncludeNode {
         let s = name.trim();
         let mut count = 0;
         for ch in s.chars() {
@@ -62,17 +62,13 @@ impl IncludeNode {
 }
 
 impl Node for IncludeNode {
-    fn node_type(&self) -> NodeType {
-        NodeType::Include
-    }
-    fn render(&self, ctx: &mut Context) -> String {
-        let mut tpl = Template::new(Path::new(self.name()), Path::new(&format!("{}", ctx.get("___dir").unwrap())));
+    fn render(&self, ctx: &Context) -> String {
+        let mut tpl = Template::new(Path::new(self.name()), Path::new(ctx.get("___dir").unwrap().as_string_ref()));
         match tpl.compile() {
             Ok(_) => {},
             Err(e) => panic!(e),
         };
-        let mut context = ctx.clone();
         // TODO: merge `context` and `self.context`
-        tpl.render(&mut context)
+        tpl.render(ctx)
     }
 }

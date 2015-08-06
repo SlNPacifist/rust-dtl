@@ -24,19 +24,18 @@ use std::io::Result;
 use std::io::{Error, ErrorKind};
 use std::slice::Iter;
 
-use Context;
-use context::Value;
-use ast::Node;
+use context::{Context, HashMapContext};
+use ast::NodeType;
 use ast::IncludeNode;
 use scanner::Token as ScannerToken;
 
-pub fn build(body: String, _iter: &mut Iter<ScannerToken>) -> Result<Option<Box<Node>>> {
+pub fn build(body: String, _iter: &mut Iter<ScannerToken>) -> Result<Option<NodeType>> {
     let mut words = body.split_whitespace();
     let name = try!(words.next().ok_or(Error::new(ErrorKind::Other, "`include` must contain name"))).to_string();
 
     match words.next() {
         Some("with") => {
-            let mut ctx = Context::new();
+            let mut ctx = HashMapContext::new();
 
             loop {
                 let expr = words.next();
@@ -51,13 +50,13 @@ pub fn build(body: String, _iter: &mut Iter<ScannerToken>) -> Result<Option<Box<
                 if name.len() == 0 {
                     return Err(Error::new(ErrorKind::Other, "`include` has incorrect value (must be op: '=' or name is missing)"));
                 }
-                ctx.set(&name.to_string(), Box::new(val.to_string()) as Box<Value>);
+                ctx.set(name, Box::new(val.to_string()));
             }
 
-            Ok(Some(Box::new(IncludeNode::new(name, Some(ctx)))))
+            Ok(Some(NodeType::Include(IncludeNode::new(name, Some(ctx)))))
         },
-        Some("only") => Ok(Some(Box::new(IncludeNode::new(name, Some(Context::new()))))),
+        Some("only") => Ok(Some(NodeType::Include(IncludeNode::new(name, Some(HashMapContext::new()))))),
         Some(_) => Err(Error::new(ErrorKind::Other, "`include` has incorrect value")),
-        None => Ok(Some(Box::new(IncludeNode::new(name, None)))),
+        None => Ok(Some(NodeType::Include(IncludeNode::new(name, None)))),
     }
 }

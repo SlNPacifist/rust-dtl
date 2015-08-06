@@ -21,10 +21,10 @@
 // THE SOFTWARE.
 
 use super::Node;
-use super::NodeType;
 use std::path::Path;
 use Context;
 
+#[derive(Clone)]
 pub struct ExtendsNode {
     name: String,
     dynamic: bool
@@ -60,10 +60,7 @@ impl ExtendsNode {
 }
 
 impl Node for ExtendsNode {
-    fn node_type(&self) -> NodeType {
-        NodeType::Extends
-    }
-    fn render(&self, _context: &mut Context) -> String {
+    fn render(&self, _context: &Context) -> String {
         "".to_string()
     }
 }
