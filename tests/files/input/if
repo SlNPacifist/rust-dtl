@@ -1,0 +1,7 @@
+{% if condition %}
+condition is true!
+{% elif condition2 %}
+condition2 is true!
+{% else %}
+nothing is true!
+{% endif %}

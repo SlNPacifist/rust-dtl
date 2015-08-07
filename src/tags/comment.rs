@@ -28,8 +28,6 @@ use ast::NodeType;
 use scanner::Token;
 
 pub fn build(_body: String, iter: &mut Iter<Token>) -> Result<Option<NodeType>> {
-    match parse(iter, Some("endcomment".to_string())) {
-        Ok(_) => Ok(None),
-        Err(e) => Err(e),
-    }
+	try!(parse(iter, vec!("endcomment")));
+	Ok(None)
 }

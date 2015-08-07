@@ -167,3 +167,26 @@ fn for_test() {
     }
     assert_eq!(tpl.render(&mut ctx), except);
 }
+
+#[test]
+fn if_test() {
+    let first_true = "\ncondition is true!\n";
+    let second_true = "\ncondition2 is true!\n";
+    let none_true = "\nnothing is true!\n";
+    let samples = vec!(
+		(Some(true), Some(false), first_true),
+		(Some(true), Some(true), first_true),
+		(None, Some(true), second_true),
+		(Some(false), None, none_true),
+		(None, None, none_true),
+	);
+    let mut tpl = Template::new(Path::new("if"), Path::new("tests/files/input/"));
+    tpl.compile().unwrap();
+    for sample in samples.iter() {
+    	let (cond1, cond2, res) = *sample;
+    	let mut ctx = HashMapContext::new();
+    	if cond1.is_some() { ctx.set("condition", Box::new(cond1.unwrap())) };
+    	if cond2.is_some() { ctx.set("condition2", Box::new(cond2.unwrap())) };
+    	assert_eq!(tpl.render(&ctx), res);
+    }
+}

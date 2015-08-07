@@ -20,24 +20,52 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-use std::io::{Error, ErrorKind, Result};
-use std::slice::Iter;
+use super::{Node, NodeType};
+use context::{Context};
 
-use ast::parse;
-use ast::NodeType;
-use ast::ForNode;
-use scanner::Token;
-
-fn parse_args(args: String) -> Result<(String, String)> {
-	let res : Vec<&str> = args.splitn(2, " in ").collect();
-	if res.len() < 2 {
-		return Err(Error::new(ErrorKind::InvalidInput, "Tag 'for' requires format 'for var in list'"));
-	}
-	Ok((res[0].to_string(), res[1].to_string()))
+#[derive(Clone)]
+struct IfBranch {
+	condition: String,
+	content: Vec<NodeType>,
 }
 
-pub fn build(body: String, iter: &mut Iter<Token>) -> Result<Option<NodeType>> {
-	let (var_name, list_name) = try!(parse_args(body));
-	let res = try!(parse(iter, vec!("endfor")));
-	Ok(Some(NodeType::For(ForNode::new(var_name, list_name, res.content))))
+impl IfBranch {
+	fn is_true(&self, c: &Context) -> bool {
+		match c.get(&self.condition) {
+			Some(ref v) => v.as_bool(),
+			None => false
+		}
+	}
+}
+
+#[derive(Clone)]
+pub struct IfNode {
+	branches: Vec<IfBranch>,
+	otherwise: Option<Vec<NodeType>>,
+}
+
+impl IfNode {
+	pub fn new() -> Self {
+		IfNode { branches: Vec::new(), otherwise: None }
+	}
+    pub fn add_branch(&mut self, condition: String, content: Vec<NodeType>) {
+    	self.branches.push(IfBranch { condition: condition, content: content });
+    }
+    pub fn add_else(&mut self, content: Vec<NodeType>) {
+    	self.otherwise = Some(content); 
+    }
+}
+
+impl Node for IfNode {
+    fn render(&self, context: &Context, storage: &mut Vec<String>) -> String {
+    	for branch in self.branches.iter() {
+    		if branch.is_true(context) {
+    			return branch.content.render(context, storage)
+    		}
+    	}
+    	match self.otherwise {
+    		Some(ref nodes) => nodes.render(context, storage),
+    		None => "".to_string(),
+    	}
+	}
 }

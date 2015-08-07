@@ -29,10 +29,6 @@ use ast::BlockNode;
 use scanner::Token;
 
 pub fn build(body: String, iter: &mut Iter<Token>) -> Result<Option<NodeType>> {
-    match parse(iter, Some("endblock".to_string())) {
-        Ok(nodes) => {
-            Ok(Some(NodeType::Block(BlockNode::new(body, nodes))))
-        },
-        Err(e) => Err(e),
-    }
+	let res = try!(parse(iter, vec!("endblock")));
+	Ok(Some(NodeType::Block(BlockNode::new(body, res.content))))
 }

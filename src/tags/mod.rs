@@ -33,6 +33,7 @@ mod comment;
 mod extends;
 mod include;
 mod for_tag;
+mod if_tag;
 
 pub fn build(name: String, body: String, iter: &mut Iter<Token>) -> Result<Option<NodeType>> {
     match name.as_ref() {
@@ -41,6 +42,7 @@ pub fn build(name: String, body: String, iter: &mut Iter<Token>) -> Result<Optio
         "include" => include::build(body, iter),
         "comment" => comment::build(body, iter),
         "for" => for_tag::build(body, iter),
+        "if" => if_tag::build(body, iter),
         _ => Err(Error::new(ErrorKind::Other, format!("Not found tag : {}", name))),
     }
 }

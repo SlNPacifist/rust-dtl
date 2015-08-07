@@ -34,6 +34,7 @@ mod include_node;
 mod text_node;
 mod variable_node;
 mod for_node;
+mod if_node;
 
 pub use self::block_node::BlockNode;
 pub use self::extends_node::ExtendsNode;
@@ -41,6 +42,25 @@ pub use self::include_node::IncludeNode;
 pub use self::text_node::TextNode;
 pub use self::variable_node::VariableNode;
 pub use self::for_node::ForNode;
+pub use self::if_node::IfNode;
+
+pub struct ParseResult {
+	pub content: Vec<NodeType>,
+	pub end_tag: Option<(String, String)>,
+}
+
+impl ParseResult {
+	fn with_end(c: Vec<NodeType>, end_tag: String, end_tag_body: String) -> ParseResult {
+		ParseResult {
+			content: c,
+			end_tag: Some((end_tag, end_tag_body))
+		}
+	}
+	
+	fn without_end(c: Vec<NodeType>) -> ParseResult {
+		ParseResult { content: c, end_tag: None }
+	}
+}
 
 #[derive(Clone)]
 pub enum NodeType {
@@ -50,6 +70,7 @@ pub enum NodeType {
     Text(TextNode),
     Variable(VariableNode),
     For(ForNode),
+    If(IfNode),
 }
 
 impl Node for NodeType {
@@ -61,6 +82,7 @@ impl Node for NodeType {
 			&NodeType::Text(ref text) => text.render(c, s),
 			&NodeType::Variable(ref var) => var.render(c, s),
 			&NodeType::For(ref for_node) => for_node.render(c, s),
+			&NodeType::If(ref if_node) => if_node.render(c, s),
 		}
 	}
 }
@@ -70,11 +92,12 @@ pub trait Node {
 }
 
 pub fn build(tokens: Vec<Token>) -> Result<Vec<NodeType>> {
-    parse(&mut tokens.iter(), None)
+	let res = try!(parse(&mut tokens.iter(), Vec::new()));
+    Ok(res.content)
 }
 
-pub fn parse(iter: &mut Iter<Token>, endblock: Option<String>) -> Result<Vec<NodeType>> {
-    let mut root: Vec<NodeType> = Vec::new();
+pub fn parse(iter: &mut Iter<Token>, endblock: Vec<&str>) -> Result<ParseResult> {
+    let mut root = Vec::new();
     let mut cur = iter.next();
     while cur.is_some() {
         let tkn = cur.unwrap();
@@ -98,8 +121,8 @@ pub fn parse(iter: &mut Iter<Token>, endblock: Option<String>) -> Result<Vec<Nod
                         let mut split = expr.splitn(2, ' ');
                         (split.next().unwrap().to_string(), split.next().unwrap_or("").to_string())
                     };
-                    if endblock == Some(cmd.clone()) {
-                        return Ok(root);
+                    if endblock.contains(&cmd.as_ref()) {
+                        return Ok(ParseResult::with_end(root, cmd, body));
                     }
                     match tags::build(cmd, body, iter) {
                         Ok(Some(tmp)) => root.push(tmp),
@@ -113,5 +136,15 @@ pub fn parse(iter: &mut Iter<Token>, endblock: Option<String>) -> Result<Vec<Nod
         }
         cur = iter.next();
     }
-    Ok(root)
+    Ok(ParseResult::without_end(root))
+}
+
+impl Node for Vec<NodeType> {
+	fn render(&self, context: &Context, storage: &mut Vec<String>) -> String {
+        let mut res = String::new();
+        for node in self.iter() {
+            res.push_str(&node.render(context, storage));
+        }
+        res
+	}
 }

@@ -23,21 +23,36 @@
 use std::io::{Error, ErrorKind, Result};
 use std::slice::Iter;
 
-use ast::parse;
-use ast::NodeType;
-use ast::ForNode;
+use ast::{parse, ParseResult, NodeType, IfNode};
 use scanner::Token;
 
-fn parse_args(args: String) -> Result<(String, String)> {
-	let res : Vec<&str> = args.splitn(2, " in ").collect();
-	if res.len() < 2 {
-		return Err(Error::new(ErrorKind::InvalidInput, "Tag 'for' requires format 'for var in list'"));
-	}
-	Ok((res[0].to_string(), res[1].to_string()))
-}
-
 pub fn build(body: String, iter: &mut Iter<Token>) -> Result<Option<NodeType>> {
-	let (var_name, list_name) = try!(parse_args(body));
-	let res = try!(parse(iter, vec!("endfor")));
-	Ok(Some(NodeType::For(ForNode::new(var_name, list_name, res.content))))
+	let mut node = IfNode::new();
+	let mut cur_condition = Some(body);
+	let mut next_condition;
+	loop {
+		let res = try!(parse(iter, vec!("elif", "else", "endif")));
+		match res {
+			ParseResult{content, end_tag: Some((tag, tag_body)) } => {
+				let mut should_finish = false;
+				next_condition = match tag.as_ref() {
+					"elif" => Some(tag_body),
+					"else" => None,
+					"endif" => {
+						should_finish = true;
+						None
+					}
+					_ => None
+				};
+				match cur_condition {
+					Some(cond) => node.add_branch(cond, content),
+					None => node.add_else(content),
+				};
+				if should_finish { break; }
+				cur_condition = next_condition;
+			}
+			_ => { return Err(Error::new(ErrorKind::InvalidInput, "Enclosing endif expected")) }
+		}
+	}
+	Ok(Some(NodeType::If(node)))
 }

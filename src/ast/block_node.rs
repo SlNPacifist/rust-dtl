@@ -41,10 +41,6 @@ impl BlockNode {
 
 impl Node for BlockNode {
     fn render(&self, context: &Context, storage: &mut Vec<String>) -> String {
-        let mut res = String::new();
-        for node in self.content.iter() {
-            res.push_str(&node.render(context, storage));
-        }
-        res
+    	self.content.render(context, storage)
     }
 }
