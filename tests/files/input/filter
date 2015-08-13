@@ -1,3 +1,4 @@
 Filter result:
-{{ a|none|default:phrase }}
+{{ a|add:6|default:"no a" }}
+{{ b|add:6|default:"no b" }}
 End filter result

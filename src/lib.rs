@@ -20,6 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#[macro_use]
+extern crate mopa;
+
 mod ast;
 mod context;
 mod filter;

@@ -198,6 +198,7 @@ fn filter_test() {
     let mut tpl = Template::new(Path::new("filter"), Path::new("tests/files/input/"));
     tpl.compile().unwrap();
 	let mut ctx = HashMapContext::new();
-	ctx.set("a", Box::new("test".to_string()));
+	ctx.set("a", Box::new(2));
+	ctx.set("b", Box::new("abc".to_string()));
 	stderr().write_all(tpl.render(&ctx).as_bytes());
 }

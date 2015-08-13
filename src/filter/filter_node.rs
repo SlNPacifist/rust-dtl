@@ -24,14 +24,26 @@ use Context;
 use value::Value;
 use std::collections::HashMap;
 
-fn filter_none(input: Option<Box<Value>>, _: &str) -> Option<Box<Value>> {
+fn filter_none(_: Option<Box<Value>>, _: &str) -> Option<Box<Value>> {
 	None
 }
 
 fn filter_default(input: Option<Box<Value>>, arg: &str) -> Option<Box<Value>> {
 	match input {
-		Some(Content) => Some(Content),
+		Some(content) => Some(content),
 		None => Some(Box::new(arg.to_string())),
+	}
+}
+
+fn filter_add(input: Option<Box<Value>>, arg: &str) -> Option<Box<Value>> {
+	match input {
+		Some(content) => {
+			match content.downcast_ref::<i32>() {
+				Some(val) => Some(Box::new(val + 7)),
+				None => None
+			}
+		},
+		None => None
 	}
 }
 
@@ -42,6 +54,7 @@ fn get_global_storage() -> FilterStorage {
 	let mut filters: FilterStorage = HashMap::new();
 	filters.insert("none".to_string(), Box::new(filter_none));
 	filters.insert("default".to_string(), Box::new(filter_default));
+	filters.insert("add".to_string(), Box::new(filter_add));
 	filters
 }
 
