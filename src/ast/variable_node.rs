@@ -21,7 +21,7 @@
 // THE SOFTWARE.
 
 use scanner::Token;
-use filters::FilterExpression;
+use filter::FilterExpression;
 use super::Node;
 use Context;
 
@@ -32,7 +32,7 @@ pub struct VariableNode {
 
 impl VariableNode {
     pub fn new(token: &Token) -> VariableNode {
-        VariableNode { expr: FilterExpression::new(token) }
+        VariableNode { expr: FilterExpression::new(&token.content) }
     }
 }
 

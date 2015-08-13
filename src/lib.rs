@@ -22,7 +22,7 @@
 
 mod ast;
 mod context;
-mod filters;
+mod filter;
 mod scanner;
 mod tags;
 mod template;

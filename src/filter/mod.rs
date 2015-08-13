@@ -21,23 +21,47 @@
 // THE SOFTWARE.
 
 use Context;
-use scanner::Token;
+mod filter_node;
+use self::filter_node::FilterNode;
+use value::Value;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct FilterExpression {
-    var: String,
-    //filters: 
+	var_name: String,
+	filters: Vec<FilterNode>,
 }
 
 impl FilterExpression {
-    pub fn new(token: &Token) -> FilterExpression {
-        FilterExpression {var: token.content.trim().to_string()}
+    pub fn new(expr: &str) -> FilterExpression {
+    	let mut expr_splitter = expr.trim().split('|');
+    	let var_name = expr_splitter.next().unwrap().to_string();
+        FilterExpression {
+        	var_name: var_name,
+        	filters: expr_splitter.map(FilterNode::from_expression).collect(),
+    	}
+    }
+    
+    fn apply_filter(&self, input: Option<Box<Value>>, iterator: &mut Iterator<Item=&FilterNode>, storage: &mut Vec<String>) -> String {
+    	match iterator.next() {
+    		Some(filter) => {
+    			self.apply_filter(filter.apply(input), iterator, storage)
+    		},
+    		None => {
+		    	match input {
+		    		None => "".to_string(),
+		    		Some(content) => content.as_string_ref(storage).to_string(),
+		    	}
+    		}
+    	}
     }
 
     pub fn render(&self, context: &Context, storage: &mut Vec<String>) -> String {
-        match context.get(&self.var) {
-            Some(val) => val.as_string_ref(storage).to_string(),
-            None => String::new(),
-        }
+    	let val = context.get(&self.var_name);
+    	let mut iter = self.filters.iter();
+    	let input = match val {
+    		Some(content) => Some(content.clone_box()),
+    		None => None,
+    	};
+    	self.apply_filter(input, &mut iter, storage)
     }
 }

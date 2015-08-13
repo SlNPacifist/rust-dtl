@@ -1,0 +1,3 @@
+Filter result:
+{{ a|none|default:phrase }}
+End filter result
