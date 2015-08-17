@@ -1,13 +1,13 @@
+extern crate dtl;
+mod vec_of_strings;
+mod filter_const;
+
 use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
-
-extern crate dtl;
 use dtl::{TemplateCompiler, Context, HashMapContext};
-
-
-mod vec_of_strings;
 use vec_of_strings::VecOfStrings;
+use filter_const::filter_const;
 
 static TEMPLATE_ROOT: &'static str = "tests/files/input/";
 static EXPECTED_ROOT: &'static str = "tests/files/except/";
@@ -129,4 +129,14 @@ fn filter_test() {
 	ctx.set("a", Box::new(2));
 	ctx.set("b", Box::new("abc".to_string()));
 	render_check("filter", &ctx, "filter");
+}
+
+#[test]
+fn custom_filter_test() {
+	let ctx = HashMapContext::new();
+    let root = PathBuf::from(TEMPLATE_ROOT);
+    let mut compiler = TemplateCompiler::new(root).unwrap();
+	compiler.add_filter("const".to_string(), filter_const);
+	let tpl = compiler.compile_file(Path::new("custom_filter")).unwrap();
+	assert_eq!(tpl.render(&ctx), "abc");
 }

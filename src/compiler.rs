@@ -17,7 +17,6 @@ fn read_file(path: &Path) -> Result<String> {
     Ok(text)
 }
 
-
 pub struct TemplateCompiler {
 	pub filters: FilterStorage,
 	pub root: PathBuf,
@@ -61,5 +60,9 @@ impl TemplateCompiler {
 	pub fn render_file(root: PathBuf, path: &Path, context: &Context) -> Result<String> {
 		let compiler = try!(Self::new(root));
 		Ok(try!(compiler.compile_file(path)).render(context))
+	}
+	
+	pub fn add_filter(&mut self, name: String, function: FilterFunction) {
+		self.filters.insert(name, function);
 	}
 }
