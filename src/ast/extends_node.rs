@@ -22,7 +22,7 @@
 
 use super::Node;
 use std::path::Path;
-use Context;
+use context::Context;
 
 #[derive(Clone)]
 pub struct ExtendsNode {

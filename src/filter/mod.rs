@@ -20,10 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-use Context;
 mod filter_node;
+mod default_filters;
+
+use std::io::Result;
+use std::collections::HashMap;
 use self::filter_node::FilterNode;
 use value::Value;
+use context::Context;
+pub use self::filter_node::FilterFunction;
+pub use self::default_filters::DEFAULT_FILTERS;
 
 #[derive(Clone, Debug)]
 pub struct FilterExpression {
@@ -32,13 +38,18 @@ pub struct FilterExpression {
 }
 
 impl FilterExpression {
-    pub fn new(expr: &str) -> FilterExpression {
+    pub fn new(expr: &str, storage: &HashMap<String, FilterFunction>) -> Result<FilterExpression> {
     	let mut expr_splitter = expr.trim().split('|');
     	let var_name = expr_splitter.next().unwrap().to_string();
-        FilterExpression {
-        	var_name: var_name,
-        	filters: expr_splitter.map(FilterNode::from_expression).collect(),
+    	let mut filters = Vec::new();
+    	for filter_expr in expr_splitter {
+    		let filter = try!(FilterNode::from_expression(filter_expr, storage));
+    		filters.push(filter);
     	}
+        Ok(FilterExpression {
+        	var_name: var_name,
+        	filters: filters,
+    	})
     }
     
     fn apply_filter(&self, input: Option<Box<Value>>, iterator: &mut Iterator<Item=&FilterNode>, storage: &mut Vec<String>) -> String {

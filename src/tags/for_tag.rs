@@ -23,10 +23,9 @@
 use std::io::{Error, ErrorKind, Result};
 use std::slice::Iter;
 
-use ast::parse;
-use ast::NodeType;
-use ast::ForNode;
+use ast::{parse, NodeType, ForNode};
 use scanner::Token;
+use compiler::TemplateCompiler;
 
 fn parse_args(args: String) -> Result<(String, String)> {
 	let res : Vec<&str> = args.splitn(2, " in ").collect();
@@ -36,8 +35,8 @@ fn parse_args(args: String) -> Result<(String, String)> {
 	Ok((res[0].to_string(), res[1].to_string()))
 }
 
-pub fn build(body: String, iter: &mut Iter<Token>) -> Result<Option<NodeType>> {
+pub fn build(body: String, iter: &mut Iter<Token>, compiler: &TemplateCompiler) -> Result<Option<NodeType>> {
 	let (var_name, list_name) = try!(parse_args(body));
-	let res = try!(parse(iter, vec!("endfor")));
+	let res = try!(parse(iter, vec!("endfor"), compiler));
 	Ok(Some(NodeType::For(ForNode::new(var_name, list_name, res.content))))
 }

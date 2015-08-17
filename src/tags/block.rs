@@ -27,8 +27,9 @@ use ast::parse;
 use ast::NodeType;
 use ast::BlockNode;
 use scanner::Token;
+use compiler::TemplateCompiler;
 
-pub fn build(body: String, iter: &mut Iter<Token>) -> Result<Option<NodeType>> {
-	let res = try!(parse(iter, vec!("endblock")));
+pub fn build(body: String, iter: &mut Iter<Token>, compiler: &TemplateCompiler) -> Result<Option<NodeType>> {
+	let res = try!(parse(iter, vec!("endblock"), compiler));
 	Ok(Some(NodeType::Block(BlockNode::new(body, res.content))))
 }

@@ -20,46 +20,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-use std::boxed::Box;
-use std::fs;
-use std::fs::File;
 use std::io::Error;
 use std::io::ErrorKind;
-use std::io::Read;
 use std::io::Result;
-use std::path::Path;
-use std::path::PathBuf;
 
-use context::{Context, MultiContext};
+use context::Context;
 use ast::{self, Node, ExtendsNode, NodeType};
 use scanner;
+use compiler::TemplateCompiler;
 
 pub struct Template {
-    ast: Vec<NodeType>,
-    path: PathBuf,
-    dir: PathBuf,
+    pub ast: Vec<NodeType>,
 }
 
 impl Template {
-    pub fn new(path: &Path, dir: &Path) -> Self {
-        Template {
-            ast: Vec::new(),
-            path: path.to_path_buf(),
-            dir: dir.to_path_buf(),
-        }
-    }
-    fn read_file(&self) -> Result<String> {
-        let metadata = try!(fs::metadata(&self.dir));
-        if !metadata.is_dir() {
-            return Err(Error::new(ErrorKind::InvalidInput, "`dir` is not directory"))
-        }
-        let mut text = String::new();
-        let mut filepath = self.dir.clone();
-        filepath.push(self.path.as_path());
-        let mut file = try!(File::open(filepath.as_path()));
-        try!(file.read_to_string(&mut text));
-        Ok(text)
-    }
     pub fn get_extends_node<'b>(t: &'b Vec<NodeType>) -> Result<Option<&'b ExtendsNode>> {
         let mut is_first = true;
         let mut res = None;
@@ -73,6 +47,7 @@ impl Template {
         }
         Ok(res)
     }
+    
     fn replace_blocks(org: &mut Vec<NodeType>, rep: &Vec<NodeType>) {
         for node in org.iter_mut() {
         	if let &mut NodeType::Block(ref mut org_block) = node {
@@ -86,43 +61,31 @@ impl Template {
         	}
         }
     }
-    pub fn compile(&mut self) -> Result<()> {
-		let text = try!(self.read_file());
+    
+    pub fn compile(text: String, compiler: &TemplateCompiler) -> Result<Template> {
         let tokens = scanner::get_tokens(&text).unwrap();
-        let t;
-        match ast::build(tokens) {
-        	Err(e) => return Err(e),
-        	Ok(tokens) => t = tokens,
-        }
+        let t = try!(ast::build(tokens, compiler));
         let is_extends;
         let mut ext_ast = None;
         {
 	        is_extends = match try!(Self::get_extends_node(&t)) {
 	        	Some(extends_node) => {
-		            let mut tpl = Self::new(extends_node.name(), self.dir.as_path());
-		            try!(tpl.compile());
-					Self::replace_blocks(&mut tpl.ast, &t);
-					ext_ast = Some(tpl.ast);
+	        		let mut parent_template = try!(compiler.compile_file(extends_node.name()));
+					Self::replace_blocks(&mut parent_template.ast, &t);
+					ext_ast = Some(parent_template.ast);
 		            true
 	            },
 	        	None => false
         	}
         };
-        self.ast = match is_extends {
+        Ok(Template { ast: match is_extends {
         	true => ext_ast.unwrap(),
         	false => t
-		};
-        Ok(())
+		}})
     }
+    
     pub fn render(&self, context: &Context) -> String {
-    	let mut common_context = MultiContext::new();
     	let mut storage = Vec::new();
-    	common_context.add(context);
-        common_context.set("___dir", Box::new(self.dir.as_path().to_str().unwrap_or("").to_string()));
-        let mut res = String::new();
-        for ast in self.ast.iter() {
-            res.push_str(&ast.render(&common_context, &mut storage));
-        }
-        return res;
+        self.ast.render(context, &mut storage)
     }
 }

@@ -20,20 +20,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-use std::io::Result;
-use std::io::{Error, ErrorKind};
+use std::io::{Error, ErrorKind, Result};
 use std::slice::Iter;
+use std::path::Path;
 
 use context::{Context, HashMapContext};
-use ast::NodeType;
-use ast::IncludeNode;
+use ast::{NodeType, IncludeNode};
 use scanner::Token as ScannerToken;
+use compiler::TemplateCompiler;
 
-pub fn build(body: String, _iter: &mut Iter<ScannerToken>) -> Result<Option<NodeType>> {
+fn get_template_ast(s: &str, compiler: &TemplateCompiler) -> Result<Vec<NodeType>>{
+    let mut count = 0;
+    for ch in s.chars() {
+        if ch == '"' {
+            count += 1;
+        }
+    }
+    let name = try!(match count {
+    	0 => Ok(s.to_string()),
+    	2 => Ok(s.trim_matches('"').to_string()),
+    	_ => Err(Error::new(ErrorKind::Other, format!("Wrong template name in include: {}", s))),
+    });
+    let template = try!(compiler.compile_file(Path::new(&name)));
+    Ok(template.ast)
+}
+
+pub fn build(body: String, _iter: &mut Iter<ScannerToken>, compiler: &TemplateCompiler) -> Result<Option<NodeType>> {
     let mut words = body.split_whitespace();
     let name = try!(words.next().ok_or(Error::new(ErrorKind::Other, "`include` must contain name"))).to_string();
+    let content = try!(get_template_ast(&name, compiler));
 
-    match words.next() {
+    let context = try!(match words.next() {
         Some("with") => {
             let mut ctx = HashMapContext::new();
 
@@ -53,10 +70,11 @@ pub fn build(body: String, _iter: &mut Iter<ScannerToken>) -> Result<Option<Node
                 ctx.set(name, Box::new(val.to_string()));
             }
 
-            Ok(Some(NodeType::Include(IncludeNode::new(name, Some(ctx)))))
+            Ok(Some(ctx))
         },
-        Some("only") => Ok(Some(NodeType::Include(IncludeNode::new(name, Some(HashMapContext::new()))))),
+        Some("only") => Ok(Some(HashMapContext::new())),
         Some(_) => Err(Error::new(ErrorKind::Other, "`include` has incorrect value")),
-        None => Ok(Some(NodeType::Include(IncludeNode::new(name, None)))),
-    }
+        None => Ok(None),
+    });
+    Ok(Some(NodeType::Include(IncludeNode::new(content, context))))
 }

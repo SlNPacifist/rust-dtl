@@ -26,6 +26,7 @@ use std::slice::Iter;
 
 pub use scanner::{Token, TokenId};
 use super::Context;
+use compiler::TemplateCompiler;
 use tags;
 
 mod block_node;
@@ -91,12 +92,12 @@ pub trait Node {
     fn render(&self, &Context, &mut Vec<String>) -> String;
 }
 
-pub fn build(tokens: Vec<Token>) -> Result<Vec<NodeType>> {
-	let res = try!(parse(&mut tokens.iter(), Vec::new()));
+pub fn build(tokens: Vec<Token>, compiler: &TemplateCompiler) -> Result<Vec<NodeType>> {
+	let res = try!(parse(&mut tokens.iter(), Vec::new(), compiler));
     Ok(res.content)
 }
 
-pub fn parse(iter: &mut Iter<Token>, endblock: Vec<&str>) -> Result<ParseResult> {
+pub fn parse(iter: &mut Iter<Token>, endblock: Vec<&str>, compiler: &TemplateCompiler) -> Result<ParseResult> {
     let mut root = Vec::new();
     let mut cur = iter.next();
     while cur.is_some() {
@@ -108,7 +109,7 @@ pub fn parse(iter: &mut Iter<Token>, endblock: Vec<&str>) -> Result<ParseResult>
             },
             TokenId::Variable => {
                 if tkn.content.trim().len() > 0 {
-                    let tmp = VariableNode::new(tkn);
+                    let tmp = try!(VariableNode::new(tkn, &compiler.filters));
                     root.push(NodeType::Variable(tmp));
                 } else {
                     return Err(Error::new(ErrorKind::InvalidInput, "Empty variable tag"));
@@ -124,7 +125,7 @@ pub fn parse(iter: &mut Iter<Token>, endblock: Vec<&str>) -> Result<ParseResult>
                     if endblock.contains(&cmd.as_ref()) {
                         return Ok(ParseResult::with_end(root, cmd, body));
                     }
-                    match tags::build(cmd, body, iter) {
+                    match tags::build(cmd, body, iter, compiler) {
                         Ok(Some(tmp)) => root.push(tmp),
                         Ok(None) => {},
                         Err(e) => return Err(e),

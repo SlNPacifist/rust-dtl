@@ -20,69 +20,60 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-use Context;
-use value::Value;
 use std::collections::HashMap;
+use std::io::{Result, Error, ErrorKind};
+use std::fmt::{self, Debug, Formatter};
+use value::Value;
 
-fn filter_none(_: Option<Box<Value>>, _: &str) -> Option<Box<Value>> {
-	None
-}
+pub type FilterFunction = fn(Option<Box<Value>>, &str) -> Option<Box<Value>>;
 
-fn filter_default(input: Option<Box<Value>>, arg: &str) -> Option<Box<Value>> {
-	match input {
-		Some(content) => Some(content),
-		None => Some(Box::new(arg.to_string())),
-	}
-}
-
-fn filter_add(input: Option<Box<Value>>, arg: &str) -> Option<Box<Value>> {
-	match input {
-		Some(content) => {
-			match content.downcast_ref::<i32>() {
-				Some(val) => Some(Box::new(val + 7)),
-				None => None
-			}
-		},
-		None => None
-	}
-}
-
-type FilterFunction = Fn(Option<Box<Value>>, &str) -> Option<Box<Value>>;
-type FilterStorage = HashMap<String, Box<FilterFunction>>;
-
-fn get_global_storage() -> FilterStorage {
-	let mut filters: FilterStorage = HashMap::new();
-	filters.insert("none".to_string(), Box::new(filter_none));
-	filters.insert("default".to_string(), Box::new(filter_default));
-	filters.insert("add".to_string(), Box::new(filter_add));
-	filters
-}
-
-#[derive(Clone, Debug)]
 pub struct FilterNode {
-	name: String,
+	func: FilterFunction,
 	arg: String,
+	name: String,
+}
+
+impl Debug for FilterNode {
+	fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+		write!(f, "FilterNode (name: {}, arg: {})", self.name, self.arg)
+	}
+}
+
+impl Clone for FilterNode {
+	fn clone(&self) -> Self {
+		FilterNode {
+			func: self.func,
+			arg: self.arg.clone(),
+			name: self.name.clone(),
+		}
+	}
 }
 
 impl FilterNode {
-	pub fn from_expression(expr: &str) -> FilterNode {
+	pub fn from_expression(expr: &str, filters: &HashMap<String, FilterFunction>) -> Result<FilterNode> {
 		let mut part_splitter = expr.splitn(2, ":");
-		FilterNode {
-			name: part_splitter.next().unwrap().to_string(),
-			arg: match part_splitter.next() {
-				Some(args) => args.to_string(),
-				None => "".to_string(),
+		let name = part_splitter.next().unwrap().to_string();
+		match filters.get(&name) {
+			Some(filter) => {
+				Ok(FilterNode {
+					name: name,
+					func: *filter,
+					arg: match part_splitter.next() {
+						Some(args) => args.to_string(),
+						None => "".to_string(),
+					}
+				})
 			},
+			None => Err(
+				Error::new(
+					ErrorKind::NotFound,
+					format!("No filter with name {}", name)
+				)
+			)
 		}
 	}
 	
 	pub fn apply(&self, input: Option<Box<Value>>) -> Option<Box<Value>> {
-		let filters = get_global_storage();
-		match filters.get(&self.name) {
-			Some(filter) => {
-				filter(input, &self.arg)
-			},
-			None => panic!(format!("No filter with name {}", self.name))
-		}
+		(self.func)(input, &self.arg)
 	}
 }

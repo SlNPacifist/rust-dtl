@@ -30,9 +30,12 @@ mod scanner;
 mod tags;
 mod template;
 mod value;
+mod compiler;
 
 pub use template::Template;
 pub use context::{Context, HashMapContext, MultiContext};
 pub use value::{Value, ValueAsStringByRef, ValueAsString, ValueAsIterator, ValueAsObject, ValueAsBool};
 pub use value::helpers::value_to_trait_object;
+pub use filter::FilterFunction;
 pub use ast::Node;
+pub use compiler::TemplateCompiler;

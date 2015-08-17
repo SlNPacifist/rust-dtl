@@ -25,13 +25,14 @@ use std::slice::Iter;
 
 use ast::{parse, ParseResult, NodeType, IfNode};
 use scanner::Token;
+use compiler::TemplateCompiler;
 
-pub fn build(body: String, iter: &mut Iter<Token>) -> Result<Option<NodeType>> {
+pub fn build(body: String, iter: &mut Iter<Token>, compiler: &TemplateCompiler) -> Result<Option<NodeType>> {
 	let mut node = IfNode::new();
 	let mut cur_condition = Some(body);
 	let mut next_condition;
 	loop {
-		let res = try!(parse(iter, vec!("elif", "else", "endif")));
+		let res = try!(parse(iter, vec!("elif", "else", "endif"), compiler));
 		match res {
 			ParseResult{content, end_tag: Some((tag, tag_body)) } => {
 				let mut should_finish = false;

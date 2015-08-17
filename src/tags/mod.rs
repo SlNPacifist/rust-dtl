@@ -21,12 +21,12 @@
 // THE SOFTWARE.
 
 use std::convert::AsRef;
-use std::io::Result;
-use std::io::{Error, ErrorKind};
+use std::io::{Error, ErrorKind, Result};
 use std::slice::Iter;
 
 use ast::NodeType;
 use scanner::Token;
+use compiler::TemplateCompiler;
 
 mod block;
 mod comment;
@@ -35,14 +35,14 @@ mod include;
 mod for_tag;
 mod if_tag;
 
-pub fn build(name: String, body: String, iter: &mut Iter<Token>) -> Result<Option<NodeType>> {
+pub fn build(name: String, body: String, iter: &mut Iter<Token>, compiler: &TemplateCompiler) -> Result<Option<NodeType>> {
     match name.as_ref() {
-        "block" => block::build(body, iter),
+        "block" => block::build(body, iter, compiler),
         "extends" => extends::build(body, iter),
-        "include" => include::build(body, iter),
-        "comment" => comment::build(body, iter),
-        "for" => for_tag::build(body, iter),
-        "if" => if_tag::build(body, iter),
+        "include" => include::build(body, iter, compiler),
+        "comment" => comment::build(body, iter, compiler),
+        "for" => for_tag::build(body, iter, compiler),
+        "if" => if_tag::build(body, iter, compiler),
         _ => Err(Error::new(ErrorKind::Other, format!("Not found tag : {}", name))),
     }
 }

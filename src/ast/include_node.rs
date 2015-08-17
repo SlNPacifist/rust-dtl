@@ -20,56 +20,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-use super::Node;
-use std::path::Path;
+use super::{Node, NodeType};
 use context::{HashMapContext, Context};
-use Template;
 
 #[derive(Clone)]
 pub struct IncludeNode {
-    name: String,
+    content: Vec<NodeType>,
     context: Option<HashMapContext>,
-    dynamic: bool,
 }
 
 impl IncludeNode {
-    pub fn new(name: String, ctx: Option<HashMapContext>) -> IncludeNode {
-        let s = name.trim();
-        let mut count = 0;
-        for ch in s.chars() {
-            if ch == '"' {
-                count += 1;
-            }
-        }
-        if count == 0 {
-            IncludeNode { name: s.to_string(), context: ctx, dynamic: true }
-        } else {
-            if count != 2 {
-                panic!("Oops! Need correct name"); 
-            } else {
-                IncludeNode { name: s.trim_matches('"').to_string(), context: ctx, dynamic: false }
-            }
-        }
-    }
-
-    pub fn name(&self) -> &Path {
-        if !self.dynamic {
-            Path::new(&self.name)
-        } else {
-            unimplemented!();
-        }
+    pub fn new(content: Vec<NodeType>, context: Option<HashMapContext>) -> IncludeNode {
+    	IncludeNode { content: content, context: context }
     }
 }
 
 impl Node for IncludeNode {
     fn render(&self, ctx: &Context, storage: &mut Vec<String>) -> String {
-    	let dir = ctx.get("___dir").unwrap().as_string_ref(storage);
-        let mut tpl = Template::new(Path::new(self.name()), Path::new(dir));
-        match tpl.compile() {
-            Ok(_) => {},
-            Err(e) => panic!(e),
-        };
-        // TODO: merge `context` and `self.context`
-        tpl.render(ctx)
+    	// TODO: merge `context` and `self.context`
+        self.content.render(ctx, storage)
     }
 }

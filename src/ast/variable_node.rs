@@ -20,10 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+use std::collections::HashMap;
+use std::io::Result;
 use scanner::Token;
 use filter::FilterExpression;
 use super::Node;
-use Context;
+use context::Context;
+use filter::FilterFunction;
 
 #[derive(Clone)]
 pub struct VariableNode {
@@ -31,8 +34,8 @@ pub struct VariableNode {
 }
 
 impl VariableNode {
-    pub fn new(token: &Token) -> VariableNode {
-        VariableNode { expr: FilterExpression::new(&token.content) }
+    pub fn new(token: &Token, filters: &HashMap<String, FilterFunction>) -> Result<VariableNode> {
+        Ok(VariableNode { expr: try!(FilterExpression::new(&token.content, filters)) })
     }
 }
 

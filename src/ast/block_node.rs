@@ -21,7 +21,7 @@
 // THE SOFTWARE.
 
 use super::{Node, NodeType};
-use Context;
+use context::Context;
 
 #[derive(Clone)]
 pub struct BlockNode {

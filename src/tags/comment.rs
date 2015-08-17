@@ -26,8 +26,9 @@ use std::slice::Iter;
 use ast::parse;
 use ast::NodeType;
 use scanner::Token;
+use compiler::TemplateCompiler;
 
-pub fn build(_body: String, iter: &mut Iter<Token>) -> Result<Option<NodeType>> {
-	try!(parse(iter, vec!("endcomment")));
+pub fn build(_body: String, iter: &mut Iter<Token>, compiler: &TemplateCompiler) -> Result<Option<NodeType>> {
+	try!(parse(iter, vec!("endcomment"), compiler));
 	Ok(None)
 }
