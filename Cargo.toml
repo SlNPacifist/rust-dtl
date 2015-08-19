@@ -1,9 +1,9 @@
 [package]
 name = "dtl"
-version = "0.0.1"
+version = "0.0.2"
 description = "Django Template Language for Rust"
-authors = ["Vladislav Orlov <orlov@tesjin.ru>"]
-repository = "https://github.com/tesjin/rust-dtl"
+authors = ["Vladislav Orlov <orlov@tesjin.ru>", "Slava Baginov <slnpacifist@gmail.com>"]
+repository = "https://github.com/SlNPacifist/rust-dtl"
 readme = "README.md"
 license = "MIT"
 
