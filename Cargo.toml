@@ -9,3 +9,4 @@ license = "MIT"
 
 [dependencies]
 mopa = "0.2"
+chrono = { version = "0.2", optional = true }
