@@ -4,7 +4,7 @@ use std::io::{Error, ErrorKind, Read, Result};
 use std::fs::File;
 use std::fs;
 
-use filter::{FilterFunction, DEFAULT_FILTERS};
+use filter::{FilterFunction, DEFAULT_FILTERS, CHRONO_FILTERS};
 use template::Template;
 use context::Context;
 
@@ -23,13 +23,20 @@ pub struct TemplateCompiler {
 }
 
 impl TemplateCompiler {
-	fn get_default_filters() -> FilterStorage {
-		let mut filters: FilterStorage = HashMap::new();
-		for i in (0..DEFAULT_FILTERS.len()) {
-			let (name, func) = DEFAULT_FILTERS[i];
-			filters.insert(name.to_string(), func);
+	fn add_filters(storage: &mut FilterStorage, filters: &[(&str, FilterFunction)]) {
+		for i in (0..filters.len()) {
+			let (name, func) = filters[i];
+			storage.insert(name.to_string(), func);
 		}
-		filters
+	}
+	
+	fn get_default_filters() -> FilterStorage {
+		let mut storage: FilterStorage = HashMap::new();
+		Self::add_filters(&mut storage, &DEFAULT_FILTERS);
+		if cfg!(feature = "chrono") {
+			Self::add_filters(&mut storage, &CHRONO_FILTERS);
+		}
+		storage
 	}
 	
 	pub fn new(root: PathBuf) -> Result<TemplateCompiler> {

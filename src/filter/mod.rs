@@ -30,6 +30,7 @@ use value::Value;
 use context::Context;
 pub use self::filter_node::FilterFunction;
 pub use self::default_filters::DEFAULT_FILTERS;
+pub use self::default_filters::CHRONO_FILTERS;
 
 #[derive(Clone, Debug)]
 pub struct FilterExpression {
