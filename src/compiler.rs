@@ -69,6 +69,10 @@ impl TemplateCompiler {
 		Ok(try!(compiler.compile_file(path)).render(context))
 	}
 	
+	pub fn render(&self, path: &Path, context: &Context) -> Result<String> {
+		Ok(try!(self.compile_file(path)).render(context))
+	}
+	
 	pub fn add_filter(&mut self, name: String, function: FilterFunction) {
 		self.filters.insert(name, function);
 	}
