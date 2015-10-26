@@ -52,28 +52,17 @@ impl FilterExpression {
         	filters: filters,
     	})
     }
-    
-    fn apply_filter(&self, input: Option<Box<Value>>, iterator: &mut Iterator<Item=&FilterNode>, storage: &mut Vec<String>) -> String {
-    	match iterator.next() {
-    		Some(filter) => {
-    			self.apply_filter(filter.apply(input), iterator, storage)
-    		},
-    		None => {
-		    	match input {
-		    		None => "".to_string(),
-		    		Some(content) => content.as_string_ref(storage).to_string(),
-		    	}
-    		}
-    	}
-    }
 
-    pub fn render(&self, context: &Context, storage: &mut Vec<String>) -> String {
+    pub fn apply(&self, context: &Context) -> Option<Box<Value>> {
     	let val = context.get(&self.var_name);
-    	let mut iter = self.filters.iter();
-    	let input = match val {
+    	let mut cur_val = match val {
     		Some(content) => Some(content.clone_box()),
     		None => None,
     	};
-    	self.apply_filter(input, &mut iter, storage)
+    	for filter in self.filters.iter() {
+    		cur_val = filter.apply(cur_val);
+    	}
+    	println!("Filter final value is {:?}", cur_val);
+    	cur_val
     }
 }

@@ -27,6 +27,7 @@ use filter::FilterExpression;
 use super::Node;
 use context::Context;
 use filter::FilterFunction;
+use value::ValueAsStringByRef;
 
 #[derive(Clone)]
 pub struct VariableNode {
@@ -41,6 +42,9 @@ impl VariableNode {
 
 impl Node for VariableNode {
     fn render(&self, context: &Context, storage: &mut Vec<String>) -> String {
-        self.expr.render(context, storage)
+        match self.expr.apply(context) {
+        	Some(val) => val.as_string_ref(storage).to_string(),
+        	None => "".to_string(),
+        }
     }
 }

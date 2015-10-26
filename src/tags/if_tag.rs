@@ -27,7 +27,12 @@ use ast::{parse, ParseResult, NodeType, IfNode};
 use scanner::Token;
 use compiler::TemplateCompiler;
 
-pub fn build(body: String, iter: &mut Iter<Token>, compiler: &TemplateCompiler) -> Result<Option<NodeType>> {
+pub fn build(
+	body: String,
+	iter: &mut Iter<Token>,
+	compiler: &TemplateCompiler)
+	-> Result<Option<NodeType>> {
+		
 	let mut node = IfNode::new();
 	let mut cur_condition = Some(body);
 	let mut next_condition;
@@ -46,7 +51,7 @@ pub fn build(body: String, iter: &mut Iter<Token>, compiler: &TemplateCompiler) 
 					_ => None
 				};
 				match cur_condition {
-					Some(cond) => node.add_branch(cond, content),
+					Some(cond) => try!(node.add_branch(cond, &compiler.filters, content)),
 					None => node.add_else(content),
 				};
 				if should_finish { break; }

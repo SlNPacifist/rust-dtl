@@ -35,7 +35,13 @@ mod include;
 mod for_tag;
 mod if_tag;
 
-pub fn build(name: String, body: String, iter: &mut Iter<Token>, compiler: &TemplateCompiler) -> Result<Option<NodeType>> {
+pub fn build(
+	name: String,
+	body: String,
+	iter: &mut Iter<Token>,
+	compiler: &TemplateCompiler)
+	-> Result<Option<NodeType>> {
+		
     match name.as_ref() {
         "block" => block::build(body, iter, compiler),
         "extends" => extends::build(body, iter),

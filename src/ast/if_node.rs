@@ -20,19 +20,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+use std::collections::HashMap;
+use std::io::Result;
 use super::{Node, NodeType};
 use context::{Context};
+use filter::{FilterExpression, FilterFunction};
 
 #[derive(Clone)]
 struct IfBranch {
-	condition: String,
+	condition: FilterExpression,
 	content: Vec<NodeType>,
 }
 
 impl IfBranch {
 	fn is_true(&self, c: &Context) -> bool {
-		match c.get(&self.condition) {
-			Some(ref v) => v.as_bool(),
+		match self.condition.apply(c) {
+			Some(res) => res.as_bool(),
 			None => false
 		}
 	}
@@ -48,8 +51,15 @@ impl IfNode {
 	pub fn new() -> Self {
 		IfNode { branches: Vec::new(), otherwise: None }
 	}
-    pub fn add_branch(&mut self, condition: String, content: Vec<NodeType>) {
-    	self.branches.push(IfBranch { condition: condition, content: content });
+    pub fn add_branch(
+    	&mut self, condition: String,
+    	filters: &HashMap<String,FilterFunction>,
+    	content: Vec<NodeType>)
+    	-> Result<()> {
+    		
+    	let cond = try!(FilterExpression::new(&condition, filters));
+    	self.branches.push(IfBranch { condition: cond, content: content });
+    	Ok(())
     }
     pub fn add_else(&mut self, content: Vec<NodeType>) {
     	self.otherwise = Some(content); 
@@ -60,7 +70,7 @@ impl Node for IfNode {
     fn render(&self, context: &Context, storage: &mut Vec<String>) -> String {
     	for branch in self.branches.iter() {
     		if branch.is_true(context) {
-    			return branch.content.render(context, storage)
+    			return branch.content.render(context, storage);
     		}
     	}
     	match self.otherwise {
