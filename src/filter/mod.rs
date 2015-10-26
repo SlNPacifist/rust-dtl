@@ -62,7 +62,6 @@ impl FilterExpression {
     	for filter in self.filters.iter() {
     		cur_val = filter.apply(cur_val);
     	}
-    	println!("Filter final value is {:?}", cur_val);
     	cur_val
     }
 }
